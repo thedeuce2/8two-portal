@@ -40,8 +40,9 @@
         <input id="itemPrice" type="number" step="0.01">
       </div>
       <div>
-        <label for="itemImageUrl">Image URL (for now)</label>
-        <input id="itemImageUrl" type="text">
+  <label for="itemImageFile">Item Image</label>
+  <input id="itemImageFile" type="file" accept="image/*">
+</div>
       </div>
       <div>
         <label><input type="checkbox" id="allowName"> Allow custom name</label>
@@ -116,7 +117,7 @@ document.getElementById('createItemBtn').addEventListener('click', async () => {
   const name = document.getElementById('itemName').value.trim();
   const description = document.getElementById('itemDescription').value.trim();
   const price = parseFloat(document.getElementById('itemPrice').value);
-  const imageUrl = document.getElementById('itemImageUrl').value.trim();
+  const fileInput = document.getElementById('itemImageFile');
   const allowName = document.getElementById('allowName').checked;
   const allowNumber = document.getElementById('allowNumber').checked;
   const statusEl = document.getElementById('adminStatus');
@@ -124,6 +125,29 @@ document.getElementById('createItemBtn').addEventListener('click', async () => {
   if (!orgId || !name || isNaN(price)) {
     statusEl.textContent = 'Organization, name and price are required.';
     return;
+  }
+
+  statusEl.textContent = 'Uploading image (if provided)...';
+
+  let imageUrl = '';
+
+  // If a file is selected, upload it first
+  if (fileInput.files && fileInput.files[0]) {
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+
+    try {
+      const uploadRes = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData
+      });
+      if (!uploadRes.ok) throw new Error('Upload failed');
+      const uploadData = await uploadRes.json();
+      imageUrl = uploadData.image_url;
+    } catch (e) {
+      statusEl.textContent = 'Image upload failed. You can try again.';
+      return;
+    }
   }
 
   statusEl.textContent = 'Creating item...';
@@ -150,7 +174,7 @@ document.getElementById('createItemBtn').addEventListener('click', async () => {
     document.getElementById('itemName').value = '';
     document.getElementById('itemDescription').value = '';
     document.getElementById('itemPrice').value = '';
-    document.getElementById('itemImageUrl').value = '';
+    fileInput.value = '';
     document.getElementById('allowName').checked = false;
     document.getElementById('allowNumber').checked = false;
 

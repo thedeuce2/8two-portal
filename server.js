@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,6 +60,26 @@ function requireAdmin(req, res, next) {
     }
   );
 }
+
+// File upload storage config
+const uploadDir = path.join(__dirname, 'uploads');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Simple filename: timestamp-originalname (you can improve later)
+    const safeName = file.originalname.replace(/\s+/g, '-');
+    cb(null, Date.now() + '-' + safeName);
+  }
+});
+
+const upload = multer({ storage });
+
+// Serve uploaded images
+app.use('/uploads', express.static(uploadDir));
+
 
 // API Routes
 
@@ -356,6 +377,16 @@ app.get('/order.html', (req, res) => {
 app.get('/api/admin/ping', requireAdmin, (req, res) => {
   res.json({ ok: true, message: 'You are an admin.' });
 });
+// Upload item image
+app.post('/api/admin/upload-image', requireAdmin, upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  // This is the URL you can store in image_url
+  const imageUrl = `/uploads/${req.file.filename}`;
+  res.json({ success: true, image_url: imageUrl });
+});
+
 // ----- ADMIN API -----
 
 // Get organizations for admin dropdown
