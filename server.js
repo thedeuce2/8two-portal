@@ -41,6 +41,7 @@ function requireAuth(req, res, next) {
     res.status(401).json({ error: 'Unauthorized' });
   }
 }
+
 function requireAdmin(req, res, next) {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -80,13 +81,16 @@ const upload = multer({ storage });
 // Serve uploaded images
 app.use('/uploads', express.static(uploadDir));
 
-
-// API Routes
+/* ======================
+   AUTH ROUTES
+====================== */
 
 // Login
 app.post('/api/login', (req, res) => {
-  const { email, password } = req.body;
-  
+  let { email, password } = req.body;
+  email = (email || '').trim();
+  password = (password || '').trim();
+
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
@@ -155,6 +159,10 @@ app.get('/api/check-auth', (req, res) => {
   }
 });
 
+/* ======================
+   CUSTOMER API
+====================== */
+
 // Get all organizations
 app.get('/api/organizations', requireAuth, (req, res) => {
   db.all(
@@ -192,7 +200,6 @@ app.get('/api/organizations/:id/items', requireAuth, (req, res) => {
         return res.status(500).json({ error: 'Database error' });
       }
 
-      // Fetch variants for each item
       let itemsProcessed = 0;
       const itemsWithVariants = items.map(item => ({
         ...item,
@@ -232,23 +239,19 @@ app.post('/api/orders', requireAuth, (req, res) => {
   const { organization_id, items: cartItems } = req.body;
   const userId = req.session.userId;
 
-  // Validation
   if (!organization_id || !cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
     return res.status(400).json({ error: 'Invalid order data' });
   }
 
-  // Validate each cart item
   for (const item of cartItems) {
     if (!item.item_id || !item.variant_id || !item.qty || item.qty < 1) {
       return res.status(400).json({ error: 'Invalid item data in cart' });
     }
   }
 
-  // Start a transaction
   db.serialize(() => {
     db.run('BEGIN TRANSACTION');
 
-    // Verify organization exists and get total amount
     db.get(
       'SELECT id FROM organizations WHERE id = ?',
       [organization_id],
@@ -258,7 +261,6 @@ app.post('/api/orders', requireAuth, (req, res) => {
           return res.status(400).json({ error: 'Invalid organization' });
         }
 
-        // Calculate total amount
         let totalAmount = 0;
         let itemsValidated = 0;
         const validatedItems = [];
@@ -280,7 +282,6 @@ app.post('/api/orders', requireAuth, (req, res) => {
                 return res.status(400).json({ error: `Invalid item or variant at position ${index + 1}` });
               }
 
-              // Validate custom name/number
               if (cartItem.custom_name && !itemData.allow_name) {
                 db.run('ROLLBACK');
                 return res.status(400).json({ error: `Custom name not allowed for item at position ${index + 1}` });
@@ -304,7 +305,6 @@ app.post('/api/orders', requireAuth, (req, res) => {
               itemsValidated++;
               
               if (itemsValidated === cartItems.length) {
-                // Create order record
                 db.run(
                   `INSERT INTO orders (user_id, organization_id, status, total_amount) 
                    VALUES (?, ?, 'pending', ?)`,
@@ -318,7 +318,6 @@ app.post('/api/orders', requireAuth, (req, res) => {
                     const orderId = this.lastID;
                     let orderItemsInserted = 0;
 
-                    // Insert order items
                     validatedItems.forEach(validatedItem => {
                       db.run(
                         `INSERT INTO order_items 
@@ -363,31 +362,23 @@ app.post('/api/orders', requireAuth, (req, res) => {
   });
 });
 
-// Serve main pages
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+/* ======================
+   ADMIN ROUTES
+====================== */
 
-app.get('/order.html', (req, res) => {
-  if (!req.session.userId) {
-    return res.redirect('/');
-  }
-  res.sendFile(path.join(__dirname, 'public', 'order.html'));
-});
+// Simple admin test
 app.get('/api/admin/ping', requireAdmin, (req, res) => {
   res.json({ ok: true, message: 'You are an admin.' });
 });
+
 // Upload item image
 app.post('/api/admin/upload-image', requireAdmin, upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
-  // This is the URL you can store in image_url
   const imageUrl = `/uploads/${req.file.filename}`;
   res.json({ success: true, image_url: imageUrl });
 });
-
-// ----- ADMIN API -----
 
 // Get organizations for admin dropdown
 app.get('/api/admin/organizations', requireAdmin, (req, res) => {
@@ -453,28 +444,95 @@ app.post('/api/admin/items', requireAdmin, (req, res) => {
   );
 });
 
-// (optional, for later) Add size variants for an item
-// app.post('/api/admin/items/:itemId/variants', requireAdmin, (req, res) => {
-//   const itemId = req.params.itemId;
-//   const { variants } = req.body; // [{ size, color, additional_price }, ...]
-//
-//   if (!variants || !Array.isArray(variants) || !variants.length) {
-//     return res.status(400).json({ error: 'variants array is required' });
-//   }
-//
-//   const stmt = db.prepare(
-//     'INSERT INTO item_variants (item_id, size, color, additional_price) VALUES (?, ?, ?, ?)'
-//   );
-//
-//   variants.forEach(v => {
-//     stmt.run(itemId, v.size || '', v.color || '', v.additional_price || 0);
-//   });
-//
-//   stmt.finalize(err => {
-//     if (err) return res.status(500).json({ error: 'Database error' });
-//     res.json({ success: true });
-//   });
-// });
+// Update an existing item
+app.put('/api/admin/items/:id', requireAdmin, (req, res) => {
+  const itemId = req.params.id;
+  const {
+    organization_id,
+    name,
+    description,
+    base_price,
+    image_url,
+    allow_name,
+    allow_number
+  } = req.body;
+
+  if (!organization_id || !name || !base_price) {
+    return res.status(400).json({ error: 'organization_id, name, and base_price are required' });
+  }
+
+  db.run(
+    `UPDATE items
+     SET organization_id = ?, name = ?, description = ?, base_price = ?, image_url = ?, allow_name = ?, allow_number = ?
+     WHERE id = ?`,
+    [
+      organization_id,
+      name,
+      description || '',
+      base_price,
+      image_url || '',
+      allow_name ? 1 : 0,
+      allow_number ? 1 : 0,
+      itemId
+    ],
+    function (err) {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// Delete an item (and its variants)
+app.delete('/api/admin/items/:id', requireAdmin, (req, res) => {
+  const itemId = req.params.id;
+
+  db.serialize(() => {
+    db.run('DELETE FROM item_variants WHERE item_id = ?', [itemId], (err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to delete variants' });
+      }
+
+      db.run('DELETE FROM items WHERE id = ?', [itemId], function (err2) {
+        if (err2) {
+          return res.status(500).json({ error: 'Failed to delete item' });
+        }
+        if (this.changes === 0) {
+          return res.status(404).json({ error: 'Item not found' });
+        }
+        res.json({ success: true });
+      });
+    });
+  });
+});
+
+/* ======================
+   PAGE ROUTES
+====================== */
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/order.html', (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect('/');
+  }
+  res.sendFile(path.join(__dirname, 'public', 'order.html'));
+});
+
+app.get('/admin.html', (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect('/');
+  }
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+/* ======================
+   ERROR HANDLING
+====================== */
 
 // 404 handler
 app.use((req, res) => {
@@ -487,7 +545,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server
+/* ======================
+   START SERVER
+====================== */
+
 app.listen(PORT, () => {
   console.log('\n=================================');
   console.log('8two Apparel Ordering Portal');
