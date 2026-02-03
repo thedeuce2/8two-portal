@@ -17,8 +17,9 @@ const newOrderBtn = document.getElementById('new-order-btn');
 const userNameEl = document.getElementById('user-name');
 const errorMessage = document.getElementById('error-message');
 const successMessage = document.getElementById('success-message');
+const adminBtn = document.getElementById('admin-btn'); // may be null on some pages
 
-// Utility Functions
+// Utility
 function formatPrice(price) {
   return '$' + parseFloat(price).toFixed(2);
 }
@@ -43,37 +44,55 @@ function showSuccess(message) {
   }
 }
 
-// Check authentication status
+// Check authentication status and adjust UI / redirects
 async function checkAuth() {
   try {
-    const response = await fetch('/api/check-auth');
-    const data = await response.json();
-    
+    const res = await fetch('/api/check-auth');
+    const data = await res.json();
+
+    const path = window.location.pathname;
+
     if (data.authenticated) {
+      // Set user name in header
       if (userNameEl) {
         userNameEl.textContent = data.user.name || data.user.email;
       }
-      if (window.location.pathname === '/') {
+
+      // Show/hide Admin button
+      if (adminBtn) {
+        if (data.user.is_admin) {
+          adminBtn.style.display = 'inline-block';
+        } else {
+          adminBtn.style.display = 'none';
+        }
+      }
+
+      // Redirect logged-in user away from login page to order page
+      if (path === '/') {
         window.location.href = '/order.html';
       }
     } else {
-      if (window.location.pathname !== '/') {
+      // Not authenticated: hide admin button if present
+      if (adminBtn) {
+        adminBtn.style.display = 'none';
+      }
+
+      // If on a protected page (order or admin), send to login
+      if (path === '/order.html' || path === '/admin.html') {
         window.location.href = '/';
       }
     }
-  } catch (error) {
-    console.error('Auth check failed:', error);
+  } catch (err) {
+    console.error('Auth check failed:', err);
   }
 }
 
-// Login functionality
+// Login
 async function handleLogin(email, password) {
   try {
     const response = await fetch('/api/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
 
@@ -93,33 +112,26 @@ async function handleLogin(email, password) {
   }
 }
 
-// Logout functionality
+// Logout
 async function handleLogout() {
   try {
-    const response = await fetch('/api/logout', {
-      method: 'POST'
-    });
-
+    const response = await fetch('/api/logout', { method: 'POST' });
     if (response.ok) {
       window.location.href = '/';
     }
-  } catch (error) {
-    console.error('Logout error:', error);
+  } catch (err) {
+    console.error('Logout error:', err);
   }
 }
 
 // Load organizations
 async function loadOrganizations() {
+  if (!orgSelect) return;
   try {
     const response = await fetch('/api/organizations');
-    
-    if (!response.ok) {
-      throw new Error('Failed to load organizations');
-    }
+    if (!response.ok) throw new Error('Failed');
 
     organizations = await response.json();
-    
-    // Populate organization dropdown
     orgSelect.innerHTML = '<option value="">-- Choose an organization --</option>';
     organizations.forEach(org => {
       const option = document.createElement('option');
@@ -135,6 +147,8 @@ async function loadOrganizations() {
 
 // Load items for selected organization
 async function loadItems(orgId) {
+  if (!itemsContainer) return;
+
   if (!orgId) {
     itemsContainer.innerHTML = '<p class="placeholder-text">Please select an organization to view available items</p>';
     currentItems = [];
@@ -143,12 +157,8 @@ async function loadItems(orgId) {
 
   try {
     itemsContainer.innerHTML = '<div class="spinner"></div>';
-    
     const response = await fetch(`/api/organizations/${orgId}/items`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to load items');
-    }
+    if (!response.ok) throw new Error('Failed to load items');
 
     currentItems = await response.json();
     renderItems();
@@ -161,6 +171,8 @@ async function loadItems(orgId) {
 
 // Render items grid
 function renderItems() {
+  if (!itemsContainer) return;
+
   if (!currentItems || currentItems.length === 0) {
     itemsContainer.innerHTML = '<p class="placeholder-text">No items available for this organization</p>';
     return;
@@ -213,7 +225,6 @@ function renderItems() {
     </div>
   `).join('');
 
-  // Add event listeners to add-to-cart buttons
   document.querySelectorAll('.add-to-cart-btn').forEach(button => {
     button.addEventListener('click', handleAddToCart);
   });
@@ -224,7 +235,6 @@ function handleAddToCart(event) {
   const button = event.target;
   const itemId = parseInt(button.dataset.itemId);
   const item = currentItems.find(i => i.id === itemId);
-  
   if (!item) {
     showError('Item not found');
     return;
@@ -240,25 +250,21 @@ function handleAddToCart(event) {
   const customName = customNameInput ? customNameInput.value.trim() : null;
   const customNumber = customNumberInput ? customNumberInput.value.trim() : null;
 
-  // Validation
   if (!variantId) {
     showError('Please select a size');
     return;
   }
-
   if (quantity < 1 || quantity > 99) {
     showError('Quantity must be between 1 and 99');
     return;
   }
 
-  // Find variant details
   const selectedOption = variantSelect.options[variantSelect.selectedIndex];
   const unitPrice = parseFloat(selectedOption.dataset.price);
   const sizeText = selectedOption.text.split(' (')[0];
 
-  // Add to cart
   const cartItem = {
-    cartItemId: Date.now(), // Unique ID for cart item
+    cartItemId: Date.now(),
     item_id: itemId,
     variant_id: variantId,
     qty: quantity,
@@ -277,6 +283,8 @@ function handleAddToCart(event) {
 
 // Update cart display
 function updateCartDisplay() {
+  if (!cartItemsContainer || !cartTotalEl || !submitOrderBtn) return;
+
   if (cart.length === 0) {
     cartItemsContainer.innerHTML = '<p class="placeholder-text">Your cart is empty</p>';
     cartTotalEl.textContent = '$0.00';
@@ -315,8 +323,12 @@ function removeFromCart(cartItemId) {
 
 // Submit order
 async function submitOrder() {
-  if (cart.length === 0) {
+  if (!cart.length) {
     showError('Your cart is empty');
+    return;
+  }
+  if (!orgSelect) {
+    showError('Organization selection not found');
     return;
   }
 
@@ -332,9 +344,7 @@ async function submitOrder() {
 
     const response = await fetch('/api/orders', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         organization_id: orgId,
         items: cart.map(item => ({
@@ -350,40 +360,47 @@ async function submitOrder() {
     const data = await response.json();
 
     if (response.ok && data.success) {
-      // Show confirmation modal
-      document.getElementById('confirmation-order-id').textContent = `#${data.order_id}`;
-      document.getElementById('confirmation-total').textContent = formatPrice(data.total_amount);
-      confirmationModal.classList.remove('hidden');
-      
-      // Clear cart
+      if (document.getElementById('confirmation-order-id')) {
+        document.getElementById('confirmation-order-id').textContent = `#${data.order_id}`;
+      }
+      if (document.getElementById('confirmation-total')) {
+        document.getElementById('confirmation-total').textContent = formatPrice(data.total_amount);
+      }
+      if (confirmationModal) {
+        confirmationModal.classList.remove('hidden');
+      }
       cart = [];
       updateCartDisplay();
     } else {
       showError(data.error || 'Failed to submit order');
     }
-  } catch (error) {
-    console.error('Order submission error:', error);
+  } catch (err) {
+    console.error('Order submission error:', err);
     showError('An error occurred while submitting your order');
   } finally {
-    submitOrderBtn.disabled = false;
-    submitOrderBtn.textContent = 'Submit Order';
+    if (submitOrderBtn) {
+      submitOrderBtn.disabled = false;
+      submitOrderBtn.textContent = 'Submit Order';
+    }
   }
 }
 
-// Close modal and start new order
+// Close modal and reset order view
 function closeConfirmationModal() {
-  confirmationModal.classList.add('hidden');
-  orgSelect.value = '';
-  itemsContainer.innerHTML = '<p class="placeholder-text">Please select an organization to view available items</p>';
-  currentItems = [];
+  if (confirmationModal) {
+    confirmationModal.classList.add('hidden');
+  }
+  if (orgSelect && itemsContainer) {
+    orgSelect.value = '';
+    itemsContainer.innerHTML = '<p class="placeholder-text">Please select an organization to view available items</p>';
+    currentItems = [];
+  }
 }
 
-// Initialize app
+// Initialize
 function init() {
-  // Check authentication
   checkAuth();
 
-  // Login form
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -393,40 +410,31 @@ function init() {
     });
   }
 
-  // Logout button
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', handleLogout);
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
   }
 
-  // Organization selection
   if (orgSelect) {
     orgSelect.addEventListener('change', (e) => {
       loadItems(e.target.value);
     });
+    loadOrganizations();
   }
 
-  // Submit order button
   if (submitOrderBtn) {
     submitOrderBtn.addEventListener('click', submitOrder);
   }
 
-  // Modal controls
   if (closeModalBtn) {
     closeModalBtn.addEventListener('click', closeConfirmationModal);
   }
-
   if (newOrderBtn) {
     newOrderBtn.addEventListener('click', closeConfirmationModal);
   }
-
-  // Load organizations if on order page
-  if (orgSelect) {
-    loadOrganizations();
-  }
 }
 
-// Run initialization when DOM is ready
 document.addEventListener('DOMContentLoaded', init);
-
-// Make removeFromCart available globally
 window.removeFromCart = removeFromCart;
