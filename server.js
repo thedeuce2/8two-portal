@@ -70,7 +70,6 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // Simple filename: timestamp-originalname (you can improve later)
     const safeName = file.originalname.replace(/\s+/g, '-');
     cb(null, Date.now() + '-' + safeName);
   }
@@ -363,7 +362,7 @@ app.post('/api/orders', requireAuth, (req, res) => {
 });
 
 /* ======================
-   ADMIN ROUTES
+   ADMIN API
 ====================== */
 
 // Simple admin test
@@ -388,6 +387,29 @@ app.get('/api/admin/organizations', requireAdmin, (req, res) => {
     (err, orgs) => {
       if (err) return res.status(500).json({ error: 'Database error' });
       res.json(orgs);
+    }
+  );
+});
+
+// Create a new organization
+app.post('/api/admin/organizations', requireAdmin, (req, res) => {
+  const { name, description } = req.body;
+
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Organization name is required' });
+  }
+
+  db.run(
+    'INSERT INTO organizations (name, description) VALUES (?, ?)',
+    [name.trim(), description || ''],
+    function (err) {
+      if (err) {
+        if (err.message && err.message.includes('UNIQUE')) {
+          return res.status(400).json({ error: 'An organization with that name already exists' });
+        }
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json({ success: true, id: this.lastID });
     }
   );
 });

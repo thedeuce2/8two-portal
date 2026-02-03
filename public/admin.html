@@ -20,6 +20,23 @@
 <main>
   <h1>Admin – Products</h1>
 
+  <!-- Add Organization -->
+  <section class="card" style="margin-bottom: 1.5rem;">
+    <h2>Add Organization</h2>
+    <div style="display:grid;gap:0.75rem;max-width:480px;">
+      <div>
+        <label for="newOrgName">Organization name</label>
+        <input id="newOrgName" type="text" placeholder="e.g. Eastview Soccer Club">
+      </div>
+      <div>
+        <label for="newOrgDescription">Description (optional)</label>
+        <input id="newOrgDescription" type="text" placeholder="Short description">
+      </div>
+      <button class="btn btn-primary" id="createOrgBtn" type="button">Create Organization</button>
+    </div>
+  </section>
+
+  <!-- Add Item -->
   <section class="card" style="margin-bottom: 1.5rem;">
     <h2>Add New Item</h2>
     <div style="display:grid;gap:0.75rem;max-width:480px;">
@@ -40,9 +57,8 @@
         <input id="itemPrice" type="number" step="0.01">
       </div>
       <div>
-  <label for="itemImageFile">Item Image</label>
-  <input id="itemImageFile" type="file" accept="image/*">
-</div>
+        <label for="itemImageFile">Item Image</label>
+        <input id="itemImageFile" type="file" accept="image/*">
       </div>
       <div>
         <label><input type="checkbox" id="allowName"> Allow custom name</label>
@@ -55,6 +71,7 @@
     </div>
   </section>
 
+  <!-- Existing Items -->
   <section class="card">
     <h2>Existing Items</h2>
     <div id="itemsList" style="font-size:0.9rem;"></div>
@@ -70,6 +87,15 @@ async function loadOrganizations() {
     const orgs = await res.json();
     const sel = document.getElementById('orgSelect');
     sel.innerHTML = '';
+
+    if (!orgs.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'No organizations yet';
+      sel.appendChild(opt);
+      return;
+    }
+
     orgs.forEach(o => {
       const opt = document.createElement('option');
       opt.value = o.id;
@@ -82,9 +108,10 @@ async function loadOrganizations() {
   }
 }
 
-// Load items list
+// Load items list (grouped by org, with Delete button)
 async function loadItems() {
   const list = document.getElementById('itemsList');
+  list.textContent = 'Loading items...';
   try {
     const res = await fetch('/api/admin/items');
     if (!res.ok) throw new Error();
@@ -100,16 +127,74 @@ async function loadItems() {
         currentOrg = item.organization_name;
         const h3 = document.createElement('h3');
         h3.textContent = currentOrg;
+        h3.style.marginTop = '0.5rem';
+        h3.style.marginBottom = '0.25rem';
         list.appendChild(h3);
       }
-      const div = document.createElement('div');
-      div.textContent = `#${item.id} – ${item.name} ($${item.base_price})`;
-      list.appendChild(div);
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      row.style.alignItems = 'center';
+      row.style.padding = '0.3rem 0';
+      row.style.borderBottom = '1px solid #e5e7eb';
+
+      const info = document.createElement('div');
+      info.textContent = `#${item.id} – ${item.name} ($${Number(item.base_price).toFixed(2)})`;
+
+      const actions = document.createElement('div');
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.style.cssText = 'font-size:0.8rem;color:#b91c1c;';
+      deleteBtn.addEventListener('click', () => deleteItem(item.id));
+
+      actions.appendChild(deleteBtn);
+      row.appendChild(info);
+      row.appendChild(actions);
+      list.appendChild(row);
     });
   } catch (e) {
     list.textContent = 'Failed to load items.';
   }
 }
+
+// Create organization
+document.getElementById('createOrgBtn').addEventListener('click', async () => {
+  const nameInput = document.getElementById('newOrgName');
+  const descInput = document.getElementById('newOrgDescription');
+  const statusEl = document.getElementById('adminStatus');
+
+  const name = nameInput.value.trim();
+  const description = descInput.value.trim();
+
+  if (!name) {
+    statusEl.textContent = 'Organization name is required.';
+    return;
+  }
+
+  statusEl.textContent = 'Creating organization...';
+
+  try {
+    const res = await fetch('/api/admin/organizations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, description })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      statusEl.textContent = data.error || 'Failed to create organization.';
+      return;
+    }
+
+    statusEl.textContent = 'Organization created.';
+    nameInput.value = '';
+    descInput.value = '';
+
+    await loadOrganizations();
+  } catch (e) {
+    statusEl.textContent = 'Failed to create organization.';
+  }
+});
 
 // Handle Create Item button
 document.getElementById('createItemBtn').addEventListener('click', async () => {
@@ -131,7 +216,6 @@ document.getElementById('createItemBtn').addEventListener('click', async () => {
 
   let imageUrl = '';
 
-  // If a file is selected, upload it first
   if (fileInput.files && fileInput.files[0]) {
     const formData = new FormData();
     formData.append('image', fileInput.files[0]);
@@ -169,7 +253,7 @@ document.getElementById('createItemBtn').addEventListener('click', async () => {
 
     if (!res.ok) throw new Error();
     const data = await res.json();
-    statusEl.textContent = `Item created with ID ${data.id}. (Sizes can be added later.)`;
+    statusEl.textContent = `Item created with ID ${data.id}.`;
 
     document.getElementById('itemName').value = '';
     document.getElementById('itemDescription').value = '';
@@ -183,6 +267,28 @@ document.getElementById('createItemBtn').addEventListener('click', async () => {
     statusEl.textContent = 'Failed to create item.';
   }
 });
+
+// Delete item
+async function deleteItem(itemId) {
+  const statusEl = document.getElementById('adminStatus');
+  if (!confirm('Delete this item and all its size variants?')) return;
+
+  statusEl.textContent = 'Deleting item...';
+
+  try {
+    const res = await fetch(`/api/admin/items/${itemId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      statusEl.textContent = 'Failed to delete item.';
+      return;
+    }
+    statusEl.textContent = 'Item deleted.';
+    loadItems();
+  } catch (e) {
+    statusEl.textContent = 'Failed to delete item.';
+  }
+}
 
 // Initial load
 loadOrganizations();
