@@ -28,7 +28,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // force non-secure cookie so sessions work the same locally and on Render
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -142,20 +142,30 @@ app.post('/api/logout', (req, res) => {
   });
 });
 
-// Check authentication status
+// Check authentication status (includes is_admin)
 app.get('/api/check-auth', (req, res) => {
-  if (req.session.userId) {
-    res.json({
-      authenticated: true,
-      user: {
-        id: req.session.userId,
-        email: req.session.userEmail,
-        name: req.session.userName
-      }
-    });
-  } else {
-    res.json({ authenticated: false });
+  if (!req.session.userId) {
+    return res.json({ authenticated: false });
   }
+
+  db.get(
+    'SELECT is_admin FROM users WHERE id = ?',
+    [req.session.userId],
+    (err, row) => {
+      if (err || !row) {
+        return res.json({ authenticated: false });
+      }
+      res.json({
+        authenticated: true,
+        user: {
+          id: req.session.userId,
+          email: req.session.userEmail,
+          name: req.session.userName,
+          is_admin: row.is_admin === 1
+        }
+      });
+    }
+  );
 });
 
 /* ======================
