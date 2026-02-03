@@ -1,0 +1,13 @@
+
+> 8two-apparel-ordering-portal@1.0.0 start
+> node server.js
+
+
+=================================
+8two Apparel Ordering Portal
+=================================
+Server running on http://localhost:3000
+Press Ctrl+C to stop
+=================================
+
+Connected to SQLite database

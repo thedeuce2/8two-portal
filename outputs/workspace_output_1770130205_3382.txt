@@ -1,0 +1,24 @@
+=== Main Files ===
+-rw-r--r-- 1 root root 10340 Feb  3 14:30 README.md
+-rw-r--r-- 1 root root  8743 Feb  3 14:02 init-db.js
+-rw-r--r-- 1 root root 10765 Feb  3 14:36 server.js
+-rw-r--r-- 1 root root  2588 Feb  3 13:56 todo.md
+
+=== Public Files ===
+total 52
+drwxr-xr-x 2 root root  4096 Feb  3 14:46 .
+drwxr-xr-x 7 user user  4096 Feb  3 14:37 ..
+-rw-r--r-- 1 root root 12787 Feb  3 14:46 app.js
+-rw-r--r-- 1 root root  1334 Feb  3 14:38 index.html
+-rw-r--r-- 1 root root  5042 Feb  3 14:37 logo.jpg
+-rw-r--r-- 1 root root  2584 Feb  3 14:39 order.html
+-rw-r--r-- 1 root root  8787 Feb  3 14:42 style.css
+
+=== Script Files ===
+total 32
+drwxr-xr-x 2 root root 4096 Feb  3 14:49 .
+drwxr-xr-x 7 user user 4096 Feb  3 14:37 ..
+-rw-r--r-- 1 root root 4759 Feb  3 14:49 add-item.js
+-rw-r--r-- 1 root root 1815 Feb  3 14:18 add-organization.js
+-rw-r--r-- 1 root root 2049 Feb  3 14:47 add-user.js
+-rw-r--r-- 1 root root 4285 Feb  3 14:49 view-orders.js

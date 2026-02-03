@@ -1,0 +1,2 @@
+./init-db.js
+./scripts/add-organization.js

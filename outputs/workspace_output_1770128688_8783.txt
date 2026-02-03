@@ -1,0 +1,60 @@
+# 8two Apparel Ordering Portal - Project Plan
+
+## Phase 1: Project Setup & Database
+- [ ] Create project directory structure
+- [ ] Initialize package.json with required dependencies (express, sqlite3, bcrypt, express-session, body-parser, multer)
+- [ ] Design database schema (users, organizations, items, item_variants, orders, order_items)
+- [ ] Create init-db.js script with table creation and seed data
+- [ ] Add test user (test@8two.com / password123)
+- [ ] Add sample organization (Eastview Soccer Club)
+- [ ] Add sample items with variants
+
+## Phase 2: Backend Development
+- [ ] Create server.js with Express app setup
+- [ ] Implement middleware (session management, body parsing, static files)
+- [ ] Create authentication routes (/api/login, /api/logout, /api/check-auth)
+- [ ] Create organization API (/api/organizations)
+- [ ] Create items API (/api/organizations/:id/items)
+- [ ] Create orders API (/api/orders - POST for submitting orders)
+- [ ] Add basic input validation and error handling
+- [ ] Add admin API for managing organizations, items, users
+
+## Phase 3: Frontend Development
+- [ ] Create public/index.html (login page)
+- [ ] Create public/order.html (ordering page with cart)
+- [ ] Create public/style.css (clean, professional styling)
+- [ ] Create public/app.js (frontend logic)
+- [ ] Implement login functionality
+- [ ] Implement organization dropdown and item loading
+- [ ] Implement add to cart functionality
+- [ ] Implement cart display and order summary
+- [ ] Implement order submission
+- [ ] Add confirmation page/message
+
+## Phase 4: Branding & Assets
+- [ ] Process provided logo image (optimize and save as logo.png)
+- [ ] Implement logo placement in header
+- [ ] Apply 8two Apparel branding colors and styling
+
+## Phase 5: Admin & Management Tools
+- [ ] Create admin-add-user.js script for adding users
+- [ ] Create admin-add-org.js script for adding organizations
+- [ ] Create admin-add-item.js script for adding items with variants
+- [ ] Create simple admin page for viewing orders (optional)
+
+## Phase 6: Documentation & Deployment
+- [ ] Create comprehensive README.md with:
+  - Installation instructions
+  - Database initialization steps
+  - How to run the app locally
+  - How to log in and test
+  - How to add new users, organizations, items
+  - Deployment instructions for Render
+- [ ] Test all functionality end-to-end
+- [ ] Verify security (password hashing, sessions, validation)
+- [ ] Final review and cleanup
+
+## Phase 7: Delivery
+- [ ] Verify all files are in place
+- [ ] Confirm all todo items are complete
+- [ ] Package project for delivery

@@ -1,0 +1,27 @@
+
+> 8two-apparel-ordering-portal@1.0.0 init-db
+> node init-db.js
+
+Connected to SQLite database
+✓ Users table created
+✓ Organizations table created
+✓ Items table created
+✓ Item variants table created
+✓ Orders table created
+✓ Order items table created
+✓ Sample organization created: Eastview Soccer Club
+✓ Item created: Home Jersey
+  ✓ 7 size variants added
+✓ Item created: Hoodie
+  ✓ 5 size variants added
+✓ Item created: Training Tee
+  ✓ 8 size variants added
+✓ Item created: Away Jersey
+  ✓ 7 size variants added
+✓ Test user created (test@8two.com / password123)
+
+✓ Database initialization complete!
+✓ Database file created at: /workspace/db.sqlite
+
+You can now start the server with: node server.js
+Database connection closed
