@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>8two Apparel – Order</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="/logo.png" alt="8two Apparel logo">
+    <span>8two Apparel</span>
+  </div>
+  <nav style="display:flex;align-items:center;gap:0.5rem;">
+    <a href="/profile.html" class="btn btn-outline" style="font-size:0.85rem;">Profile</a>
+    <a href="/order.html" class="btn btn-outline" style="font-size:0.85rem;">Order</a>
+    <a href="/admin.html" id="adminNavLink" class="btn btn-outline" style="font-size:0.85rem;">Admin</a>
+    <form method="POST" action="/api/logout" style="margin-left:0.5rem;">
+      <button type="submit" class="btn btn-outline" style="font-size: 0.85rem;">Log Out</button>
+    </form>
+  </nav>
+</header>
+
+<main>
+  <!-- Your existing order UI here: org dropdown, items, cart -->
+  <!-- Example structure: -->
+  <section class="card" style="margin-bottom:1.5rem;">
+    <h1>Place an Order</h1>
+    <p style="color:#6b7280;font-size:0.9rem;">Select your organization and add items to your order.</p>
+  </section>
+
+  <section class="card">
+    <!-- existing markup from your order page goes here (orgSelect, itemsContainer, cart, etc.) -->
+    <!-- ensure IDs match what app.js expects: org-select, items-container, cart-items, cart-total, etc. -->
+  </section>
+</main>
+
+<script>
+// Hide admin nav link if not admin
+(async function configureNav() {
+  try {
+    const res = await fetch('/api/check-auth');
+    const data = await res.json();
+    if (!data.authenticated) {
+      window.location.href = '/';
+      return;
+    }
+    const adminLink = document.getElementById('adminNavLink');
+    if (adminLink && !data.user.is_admin) {
+      adminLink.style.display = 'none';
+    }
+  } catch (e) {
+    console.error('Nav auth check failed:', e);
+    window.location.href = '/';
+  }
+})();
+</script>
+
+<script src="/app.js"></script>
+</body>
+</html>

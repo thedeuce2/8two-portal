@@ -5,22 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>8two Apparel - Order</title>
   <link rel="stylesheet" href="style.css">
-<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+  <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <header class="header">
-      <div class="logo-container">
-        <img src="logo.jpg" alt="8two Apparel" class="logo">
-      </div>
-      <div class="header-info">
-        <h1>8two Apparel</h1>
-        <span id="user-name" class="user-name"></span>
-      </div>
-      <button id="logout-btn" class="btn btn-secondary">Logout</button>
-    </header>
+  <!-- Global toolbar / header -->
+  <header class="header">
+    <div class="logo-container">
+      <img src="logo.jpg" alt="8two Apparel" class="logo">
+    </div>
+    <div class="header-info">
+      <h1>8two Apparel</h1>
+      <span id="user-name" class="user-name"></span>
+    </div>
+    <nav style="display:flex;align-items:center;gap:0.5rem;">
+      <a href="/profile.html" class="btn btn-secondary" style="font-size:0.85rem;">Profile</a>
+      <a href="/order.html" class="btn btn-secondary" style="font-size:0.85rem;">Order</a>
+      <a href="/admin.html" id="adminNavLink" class="btn btn-secondary" style="font-size:0.85rem;">Admin</a>
+      <button id="logout-btn" class="btn btn-secondary" style="font-size:0.85rem;">Logout</button>
+    </nav>
+  </header>
 
+  <div class="app-container">
     <!-- Main Content -->
     <div class="main-content">
       <!-- Organization Selection -->
@@ -62,7 +67,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>Order Submitted!</h2>
-        <button id="close-modal" class="close-btn">&times;</button>
+        <button id="close-modal" class="close-btn">×</button>
       </div>
       <div class="modal-body">
         <p>Your order has been successfully submitted.</p>
@@ -73,6 +78,27 @@
       </div>
     </div>
   </div>
+
+  <!-- Hide admin link for non-admins -->
+  <script>
+  (async function configureNav() {
+    try {
+      const res = await fetch('/api/check-auth');
+      const data = await res.json();
+      if (!data.authenticated) {
+        window.location.href = '/';
+        return;
+      }
+      const adminLink = document.getElementById('adminNavLink');
+      if (adminLink && !data.user.is_admin) {
+        adminLink.style.display = 'none';
+      }
+    } catch (e) {
+      console.error('Nav auth check failed:', e);
+      window.location.href = '/';
+    }
+  })();
+  </script>
 
   <script src="app.js"></script>
 </body>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>8two Apparel - Login</title>
   <link rel="stylesheet" href="style.css">
-<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+  <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
   <div class="login-container">
@@ -16,24 +16,31 @@
       <h1>8two Apparel</h1>
       <p class="subtitle">Customer Ordering Portal</p>
       
-            <form id="login-form" class="login-form">
+      <form id="login-form" class="login-form">
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" required placeholder="your@email.com">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            placeholder="your@email.com"
+          >
         </div>
         
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required placeholder="••••••••">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            placeholder="••••••••"
+          >
         </div>
         
         <button type="submit" class="btn btn-primary">Login</button>
       </form>
-
-      <!-- Simple admin button -->
-      <div style="margin-top: 1rem; text-align: center;">
-        <a href="/admin.html" class="btn btn-secondary">Admin</a>
-      </div>
       
       <div id="error-message" class="error-message hidden"></div>
       <div id="success-message" class="success-message hidden"></div>

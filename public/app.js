@@ -17,7 +17,7 @@ const newOrderBtn = document.getElementById('new-order-btn');
 const userNameEl = document.getElementById('user-name');
 const errorMessage = document.getElementById('error-message');
 const successMessage = document.getElementById('success-message');
-const adminBtn = document.getElementById('admin-btn'); // may be null on some pages
+// We won't manage adminBtn here anymore; profile.html will handle admin link visibility
 
 // Utility
 function formatPrice(price) {
@@ -53,32 +53,19 @@ async function checkAuth() {
     const path = window.location.pathname;
 
     if (data.authenticated) {
-      // Set user name in header
+      // Set user name in header if present
       if (userNameEl) {
         userNameEl.textContent = data.user.name || data.user.email;
       }
 
-      // Show/hide Admin button
-      if (adminBtn) {
-        if (data.user.is_admin) {
-          adminBtn.style.display = 'inline-block';
-        } else {
-          adminBtn.style.display = 'none';
-        }
-      }
-
-      // Redirect logged-in user away from login page to order page
+      // If user is on login page and already logged in, send to profile
       if (path === '/') {
-        window.location.href = '/order.html';
+        window.location.href = '/profile.html';
       }
     } else {
-      // Not authenticated: hide admin button if present
-      if (adminBtn) {
-        adminBtn.style.display = 'none';
-      }
-
-      // If on a protected page (order or admin), send to login
-      if (path === '/order.html' || path === '/admin.html') {
+      // Not authenticated:
+      // If on a protected page (order or admin or profile), send to login
+      if (path === '/order.html' || path === '/admin.html' || path === '/profile.html') {
         window.location.href = '/';
       }
     }
@@ -101,7 +88,8 @@ async function handleLogin(email, password) {
     if (response.ok && data.success) {
       showSuccess('Login successful! Redirecting...');
       setTimeout(() => {
-        window.location.href = '/order.html';
+        // Go to profile after login
+        window.location.href = '/profile.html';
       }, 1000);
     } else {
       showError(data.error || 'Login failed. Please try again.');
@@ -169,7 +157,7 @@ async function loadItems(orgId) {
   }
 }
 
-// Render items grid
+// Render items grid (with image or placeholder)
 function renderItems() {
   if (!itemsContainer) return;
 
@@ -178,52 +166,64 @@ function renderItems() {
     return;
   }
 
-  itemsContainer.innerHTML = currentItems.map(item => `
-    <div class="item-card" data-item-id="${item.id}">
-      <h3 class="item-name">${item.name}</h3>
-      <p class="item-description">${item.description || ''}</p>
-      <p class="item-price">${formatPrice(item.base_price)}</p>
-      
-      <div class="item-controls">
-        <div>
-          <label>Size:</label>
-          <select class="item-variant" data-item-id="${item.id}">
-            <option value="">Select size</option>
-            ${item.variants.map(variant => 
-              `<option value="${variant.id}" data-price="${item.base_price + variant.additional_price}">
-                ${variant.size}${variant.color ? ' - ' + variant.color : ''} 
-                ${variant.additional_price > 0 ? '(+$' + variant.additional_price.toFixed(2) + ')' : ''}
-              </option>`
-            ).join('')}
-          </select>
-        </div>
+  itemsContainer.innerHTML = currentItems.map(item => {
+    const hasImage = item.image_url && item.image_url.trim() !== '';
+    const imgHtml = hasImage
+      ? `<img src="${item.image_url}" alt="${item.name}"
+               class="item-thumb"
+               style="width:120px;height:120px;object-fit:cover;border-radius:8px;margin-bottom:0.5rem;">`
+      : `<div class="item-thumb-placeholder"
+               style="width:120px;height:120px;border-radius:8px;
+                      background:#e5e7eb;margin-bottom:0.5rem;"></div>`;
+
+    return `
+      <div class="item-card" data-item-id="${item.id}">
+        ${imgHtml}
+        <h3 class="item-name">${item.name}</h3>
+        <p class="item-description">${item.description || ''}</p>
+        <p class="item-price">${formatPrice(item.base_price)}</p>
         
-        <div>
-          <label>Quantity:</label>
-          <input type="number" class="item-quantity" data-item-id="${item.id}" 
-                 min="1" value="1" max="99">
-        </div>
-        
-        ${item.allow_name ? `
+        <div class="item-controls">
           <div>
-            <label>Name (optional):</label>
-            <input type="text" class="item-custom-name" data-item-id="${item.id}" 
-                   placeholder="Enter name" maxlength="20">
+            <label>Size:</label>
+            <select class="item-variant" data-item-id="${item.id}">
+              <option value="">Select size</option>
+              ${item.variants.map(variant => 
+                `<option value="${variant.id}" data-price="${item.base_price + variant.additional_price}">
+                  ${variant.size}${variant.color ? ' - ' + variant.color : ''} 
+                  ${variant.additional_price > 0 ? '(+$' + variant.additional_price.toFixed(2) + ')' : ''}
+                </option>`
+              ).join('')}
+            </select>
           </div>
-        ` : ''}
-        
-        ${item.allow_number ? `
+          
           <div>
-            <label>Number (optional):</label>
-            <input type="text" class="item-custom-number" data-item-id="${item.id}" 
-                   placeholder="Enter number" maxlength="5">
+            <label>Quantity:</label>
+            <input type="number" class="item-quantity" data-item-id="${item.id}" 
+                   min="1" value="1" max="99">
           </div>
-        ` : ''}
-        
-        <button class="add-to-cart-btn" data-item-id="${item.id}">Add to Order</button>
+          
+          ${item.allow_name ? `
+            <div>
+              <label>Name (optional):</label>
+              <input type="text" class="item-custom-name" data-item-id="${item.id}" 
+                     placeholder="Enter name" maxlength="20">
+            </div>
+          ` : ''}
+          
+          ${item.allow_number ? `
+            <div>
+              <label>Number (optional):</label>
+              <input type="text" class="item-custom-number" data-item-id="${item.id}" 
+                     placeholder="Enter number" maxlength="5">
+            </div>
+          ` : ''}
+          
+          <button class="add-to-cart-btn" data-item-id="${item.id}">Add to Order</button>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   document.querySelectorAll('.add-to-cart-btn').forEach(button => {
     button.addEventListener('click', handleAddToCart);

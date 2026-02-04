@@ -5,10 +5,19 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bodyParser = require('body-parser');
 const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_PATH = path.join(__dirname, 'db.sqlite');
+
+// Use DATA_DIR if provided (e.g., /data on Render), otherwise current directory
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+const DB_PATH = path.join(DATA_DIR, 'db.sqlite');
+
+// Ensure DATA_DIR exists (should exist already for Render disk, but safe)
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 // Database connection
 const db = new sqlite3.Database(DB_PATH, (err) => {
@@ -16,7 +25,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     console.error('Error opening database:', err.message);
     process.exit(1);
   }
-  console.log('Connected to SQLite database');
+  console.log('Connected to SQLite database at', DB_PATH);
 });
 
 // Middleware
@@ -28,42 +37,22 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // force non-secure cookie so sessions work the same locally and on Render
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    secure: false,            // same behavior locally and on Render
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
-// Authentication middleware
+// Logged-in check
 function requireAuth(req, res, next) {
-  if (req.session.userId) {
-    next();
-  } else {
-    res.status(401).json({ error: 'Unauthorized' });
-  }
+  if (req.session.userId) return next();
+  return res.status(401).json({ error: 'Unauthorized' });
 }
 
-function requireAdmin(req, res, next) {
-  if (!req.session.userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  db.get(
-    'SELECT is_admin FROM users WHERE id = ?',
-    [req.session.userId],
-    (err, row) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-      if (!row || row.is_admin !== 1) {
-        return res.status(403).json({ error: 'Forbidden' });
-      }
-      next();
-    }
-  );
+// File upload storage config (under DATA_DIR/uploads)
+const uploadDir = path.join(DATA_DIR, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
-
-// File upload storage config
-const uploadDir = path.join(__dirname, 'uploads');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -98,22 +87,12 @@ app.post('/api/login', (req, res) => {
     'SELECT id, email, password_hash, name FROM users WHERE email = ?',
     [email],
     (err, user) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-      
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid email or password' });
-      }
+      if (err) return res.status(500).json({ error: 'Database error' });
+      if (!user) return res.status(401).json({ error: 'Invalid email or password' });
 
       bcrypt.compare(password, user.password_hash, (err, isValid) => {
-        if (err) {
-          return res.status(500).json({ error: 'Authentication error' });
-        }
-        
-        if (!isValid) {
-          return res.status(401).json({ error: 'Invalid email or password' });
-        }
+        if (err) return res.status(500).json({ error: 'Authentication error' });
+        if (!isValid) return res.status(401).json({ error: 'Invalid email or password' });
 
         req.session.userId = user.id;
         req.session.userName = user.name;
@@ -135,14 +114,12 @@ app.post('/api/login', (req, res) => {
 // Logout
 app.post('/api/logout', (req, res) => {
   req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Logout failed' });
-    }
+    if (err) return res.status(500).json({ error: 'Logout failed' });
     res.json({ success: true });
   });
 });
 
-// Check authentication status (includes is_admin)
+// Auth check INCLUDING is_admin from DB
 app.get('/api/check-auth', (req, res) => {
   if (!req.session.userId) {
     return res.json({ authenticated: false });
@@ -172,24 +149,20 @@ app.get('/api/check-auth', (req, res) => {
    CUSTOMER API
 ====================== */
 
-// Get all organizations
 app.get('/api/organizations', requireAuth, (req, res) => {
   db.all(
     'SELECT id, name, description FROM organizations ORDER BY name',
     [],
     (err, organizations) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
+      if (err) return res.status(500).json({ error: 'Database error' });
       res.json(organizations);
     }
   );
 });
 
-// Get items for a specific organization with variants
 app.get('/api/organizations/:id/items', requireAuth, (req, res) => {
   const orgId = req.params.id;
-  
+
   db.all(
     `SELECT 
       i.id, 
@@ -205,9 +178,7 @@ app.get('/api/organizations/:id/items', requireAuth, (req, res) => {
      ORDER BY i.name`,
     [orgId],
     (err, items) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
+      if (err) return res.status(500).json({ error: 'Database error' });
 
       let itemsProcessed = 0;
       const itemsWithVariants = items.map(item => ({
@@ -231,7 +202,7 @@ app.get('/api/organizations/:id/items', requireAuth, (req, res) => {
             } else {
               item.variants = variants;
             }
-            
+
             itemsProcessed++;
             if (itemsProcessed === items.length) {
               res.json(itemsWithVariants);
@@ -243,7 +214,6 @@ app.get('/api/organizations/:id/items', requireAuth, (req, res) => {
   );
 });
 
-// Submit an order
 app.post('/api/orders', requireAuth, (req, res) => {
   const { organization_id, items: cartItems } = req.body;
   const userId = req.session.userId;
@@ -372,25 +342,10 @@ app.post('/api/orders', requireAuth, (req, res) => {
 });
 
 /* ======================
-   ADMIN API
+   ADMIN API (any logged-in user)
 ====================== */
 
-// Simple admin test
-app.get('/api/admin/ping', requireAdmin, (req, res) => {
-  res.json({ ok: true, message: 'You are an admin.' });
-});
-
-// Upload item image
-app.post('/api/admin/upload-image', requireAdmin, upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
-  }
-  const imageUrl = `/uploads/${req.file.filename}`;
-  res.json({ success: true, image_url: imageUrl });
-});
-
-// Get organizations for admin dropdown
-app.get('/api/admin/organizations', requireAdmin, (req, res) => {
+app.get('/api/admin/organizations', requireAuth, (req, res) => {
   db.all(
     'SELECT id, name FROM organizations ORDER BY name',
     [],
@@ -401,10 +356,33 @@ app.get('/api/admin/organizations', requireAdmin, (req, res) => {
   );
 });
 
-// Create a new organization
-app.post('/api/admin/organizations', requireAdmin, (req, res) => {
-  const { name, description } = req.body;
+app.get('/api/admin/items', requireAuth, (req, res) => {
+  const sql = `
+    SELECT i.id, i.name, i.description, i.base_price, i.image_url,
+           i.allow_name, i.allow_number,
+           o.id AS organization_id, o.name AS organization_name
+    FROM items i
+    JOIN organizations o ON i.organization_id = o.id
+    ORDER BY o.name, i.name
+  `;
+  db.all(sql, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    res.json(rows);
+  });
+});
 
+// Upload item image
+app.post('/api/admin/upload-image', requireAuth, upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  const imageUrl = `/uploads/${req.file.filename}`;
+  res.json({ success: true, image_url: imageUrl });
+});
+
+// Create new org
+app.post('/api/admin/organizations', requireAuth, (req, res) => {
+  const { name, description } = req.body;
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'Organization name is required' });
   }
@@ -424,24 +402,8 @@ app.post('/api/admin/organizations', requireAdmin, (req, res) => {
   );
 });
 
-// Get all items with organization info
-app.get('/api/admin/items', requireAdmin, (req, res) => {
-  const sql = `
-    SELECT i.id, i.name, i.description, i.base_price, i.image_url,
-           i.allow_name, i.allow_number,
-           o.id AS organization_id, o.name AS organization_name
-    FROM items i
-    JOIN organizations o ON i.organization_id = o.id
-    ORDER BY o.name, i.name
-  `;
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
-    res.json(rows);
-  });
-});
-
-// Create a new item
-app.post('/api/admin/items', requireAdmin, (req, res) => {
+// Create item
+app.post('/api/admin/items', requireAuth, (req, res) => {
   const {
     organization_id,
     name,
@@ -476,8 +438,8 @@ app.post('/api/admin/items', requireAdmin, (req, res) => {
   );
 });
 
-// Update an existing item
-app.put('/api/admin/items/:id', requireAdmin, (req, res) => {
+// Update item
+app.put('/api/admin/items/:id', requireAuth, (req, res) => {
   const itemId = req.params.id;
   const {
     organization_id,
@@ -517,16 +479,18 @@ app.put('/api/admin/items/:id', requireAdmin, (req, res) => {
   );
 });
 
-// Delete an item (and its variants)
-app.delete('/api/admin/items/:id', requireAdmin, (req, res) => {
+// Delete item (and its variants)
+app.delete('/api/admin/items/:id', requireAuth, (req, res) => {
   const itemId = req.params.id;
 
   db.serialize(() => {
+    // Delete variants for this item
     db.run('DELETE FROM item_variants WHERE item_id = ?', [itemId], (err) => {
       if (err) {
         return res.status(500).json({ error: 'Failed to delete variants' });
       }
 
+      // Delete the item itself
       db.run('DELETE FROM items WHERE id = ?', [itemId], function (err2) {
         if (err2) {
           return res.status(500).json({ error: 'Failed to delete item' });
@@ -540,12 +504,101 @@ app.delete('/api/admin/items/:id', requireAdmin, (req, res) => {
   });
 });
 
+// Delete organization (and all its items + variants)
+app.delete('/api/admin/organizations/:id', requireAuth, (req, res) => {
+  const orgId = req.params.id;
+
+  db.serialize(() => {
+    db.run('BEGIN TRANSACTION');
+
+    // Find items for this org
+    db.all('SELECT id FROM items WHERE organization_id = ?', [orgId], (err, items) => {
+      if (err) {
+        db.run('ROLLBACK');
+        return res.status(500).json({ error: 'Failed to fetch items for organization' });
+      }
+
+      const itemIds = items.map(i => i.id);
+
+      // Delete variants for all items
+      if (itemIds.length > 0) {
+        const placeholders = itemIds.map(() => '?').join(',');
+        db.run(
+          `DELETE FROM item_variants WHERE item_id IN (${placeholders})`,
+          itemIds,
+          (errVar) => {
+            if (errVar) {
+              db.run('ROLLBACK');
+              return res.status(500).json({ error: 'Failed to delete item variants' });
+            }
+
+            // Delete items
+            db.run(
+              `DELETE FROM items WHERE id IN (${placeholders})`,
+              itemIds,
+              (errItems) => {
+                if (errItems) {
+                  db.run('ROLLBACK');
+                  return res.status(500).json({ error: 'Failed to delete items' });
+                }
+
+                // Finally delete org
+                db.run(
+                  'DELETE FROM organizations WHERE id = ?',
+                  [orgId],
+                  function (errOrg) {
+                    if (errOrg) {
+                      db.run('ROLLBACK');
+                      return res.status(500).json({ error: 'Failed to delete organization' });
+                    }
+                    if (this.changes === 0) {
+                      db.run('ROLLBACK');
+                      return res.status(404).json({ error: 'Organization not found' });
+                    }
+                    db.run('COMMIT');
+                    res.json({ success: true });
+                  }
+                );
+              }
+            );
+          }
+        );
+      } else {
+        // No items; just delete org
+        db.run(
+          'DELETE FROM organizations WHERE id = ?',
+          [orgId],
+          function (errOrg) {
+            if (errOrg) {
+              db.run('ROLLBACK');
+              return res.status(500).json({ error: 'Failed to delete organization' });
+            }
+            if (this.changes === 0) {
+              db.run('ROLLBACK');
+              return res.status(404).json({ error: 'Organization not found' });
+            }
+            db.run('COMMIT');
+            res.json({ success: true });
+          }
+        );
+      }
+    });
+  });
+});
+
 /* ======================
    PAGE ROUTES
 ====================== */
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/profile.html', (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect('/');
+  }
+  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
 app.get('/order.html', (req, res) => {
@@ -566,12 +619,10 @@ app.get('/admin.html', (req, res) => {
    ERROR HANDLING
 ====================== */
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
@@ -586,11 +637,12 @@ app.listen(PORT, () => {
   console.log('8two Apparel Ordering Portal');
   console.log('=================================');
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Press Ctrl+C to stop`);
+  console.log(`DB at ${DB_PATH}`);
+  console.log(`Uploads at ${uploadDir}`);
+  console.log('Press Ctrl+C to stop');
   console.log('=================================\n');
 });
 
-// Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\nShutting down server...');
   db.close((err) => {

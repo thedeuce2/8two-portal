@@ -25,22 +25,22 @@ function initializeDatabase() {
     db.run('DROP TABLE IF EXISTS users');
 
     // Create users table
-db.run(`
-  CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    name TEXT,
-    is_admin INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`, (err) => {
-  if (err) {
-    console.error('Error creating users table:', err.message);
-  } else {
-    console.log('✓ Users table created');
-  }
-});
+    db.run(`
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        name TEXT,
+        is_admin INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('Error creating users table:', err.message);
+      } else {
+        console.log('✓ Users table created');
+      }
+    });
 
     // Create organizations table
     db.run(`
@@ -149,20 +149,21 @@ db.run(`
 function seedData() {
   setTimeout(() => {
     db.serialize(() => {
-      // Insert test user
+      // Insert test user (admin)
       bcrypt.hash('password123', 10, (err, hash) => {
         if (err) {
           console.error('Error hashing password:', err.message);
           return;
         }
-          db.run(
-    `INSERT INTO users (email, password_hash, name, is_admin) VALUES (?, ?, ?, 1)`,
-    ['test@8two.com', hash, 'Test User'],
+
+        db.run(
+          `INSERT INTO users (email, password_hash, name, is_admin) VALUES (?, ?, ?, 1)`,
+          ['test@8two.com', hash, 'Test User'],
           (err) => {
             if (err) {
               console.error('Error inserting test user:', err.message);
             } else {
-              console.log('✓ Test user created (test@8two.com / password123)');
+              console.log('✓ Test user created (test@8two.com / password123, admin)');
             }
           }
         );
@@ -172,15 +173,15 @@ function seedData() {
       db.run(
         `INSERT INTO organizations (name, description) VALUES (?, ?)`,
         ['Eastview Soccer Club', 'Youth soccer club serving Eastview community since 2010'],
-        function(err) {
+        function (err) {
           if (err) {
             console.error('Error inserting organization:', err.message);
           } else {
             console.log('✓ Sample organization created: Eastview Soccer Club');
-            
+
             const orgId = this.lastID;
 
-            // Insert sample items
+            // Sample items
             const items = [
               {
                 name: 'Home Jersey',
@@ -216,11 +217,12 @@ function seedData() {
               }
             ];
 
-            items.forEach((item, index) => {
+            items.forEach((item) => {
               db.run(
-                `INSERT INTO items (organization_id, name, description, base_price, allow_name, allow_number) VALUES (?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO items (organization_id, name, description, base_price, allow_name, allow_number)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
                 [orgId, item.name, item.description, item.base_price, item.allow_name ? 1 : 0, item.allow_number ? 1 : 0],
-                function(err) {
+                function (err) {
                   if (err) {
                     console.error(`Error inserting item ${item.name}:`, err.message);
                   } else {
