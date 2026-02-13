@@ -34,17 +34,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Set auth cookie
+    // Create simple auth token (in production, use JWT)
+    const authToken = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+    
     const response = NextResponse.json({
       id: user.id,
       email: user.email,
       name: user.name,
     });
 
-    // Create simple auth token (in production, use JWT)
-    const authToken = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
-    
-    cookies().set('auth_token', authToken, {
+    // Set auth cookie
+    const cookieStore = await cookies();
+    cookieStore.set('auth_token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

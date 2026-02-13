@@ -3,7 +3,8 @@ import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
 
 async function getUserId(): Promise<string | null> {
-  const authToken = cookies().get('auth_token')?.value;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get('auth_token')?.value;
   
   if (!authToken) return null;
   
