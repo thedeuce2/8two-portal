@@ -105,6 +105,15 @@ function TeamsTab() {
     fetchTeams();
   }, []);
 
+  const generateCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setFormData({ ...formData, code });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const method = editingId ? 'PATCH' : 'POST';
@@ -143,7 +152,7 @@ function TeamsTab() {
           onClick={() => { setIsAdding(true); setEditingId(null); setFormData({ name: '', slug: '', code: '', description: '' }); }}
           className="bg-white text-black px-4 py-2 rounded font-bold text-xs uppercase"
         >
-          Add New
+          Add New Organization
         </button>
       </div>
 
@@ -153,25 +162,34 @@ function TeamsTab() {
           <div className="grid sm:grid-cols-2 gap-4">
             <input 
               placeholder="Name (e.g. Thunder Basketball)" 
-              className="bg-black border border-zinc-800 p-3 text-sm rounded"
+              className="bg-black border border-zinc-800 p-3 text-sm rounded w-full"
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
               required
             />
             <input 
               placeholder="Slug (optional)" 
-              className="bg-black border border-zinc-800 p-3 text-sm rounded"
+              className="bg-black border border-zinc-800 p-3 text-sm rounded w-full"
               value={formData.slug}
               onChange={e => setFormData({...formData, slug: e.target.value})}
             />
           </div>
-          <input 
-            placeholder="Unique Join Code (e.g. THUNDER25)" 
-            className="bg-black border border-zinc-800 p-3 text-sm rounded"
-            value={formData.code}
-            onChange={e => setFormData({...formData, code: e.target.value})}
-            required
-          />
+          <div className="flex gap-2">
+            <input 
+              placeholder="Join Code (e.g. THUNDER25)" 
+              className="bg-black border border-zinc-800 p-3 text-sm rounded flex-1"
+              value={formData.code}
+              onChange={e => setFormData({...formData, code: e.target.value})}
+              required
+            />
+            <button 
+              type="button"
+              onClick={generateCode}
+              className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest border border-zinc-600"
+            >
+              Generate
+            </button>
+          </div>
           <textarea 
             placeholder="Description" 
             className="bg-black border border-zinc-800 p-3 text-sm rounded h-24"
@@ -187,21 +205,25 @@ function TeamsTab() {
 
       <div className="grid gap-4">
         {teams.map(team => (
-          <div key={team.id} className="bg-zinc-900 p-4 rounded-lg border border-zinc-800 flex justify-between items-center">
+          <div key={team.id} className="bg-zinc-900 p-6 rounded-lg border border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-zinc-500 transition-colors">
             <div>
-              <p className="font-bold uppercase">{team.name}</p>
-              <p className="text-xs text-zinc-500">Code: {team.code} | members: {team._count.members}</p>
+              <p className="font-black text-xl tracking-tighter uppercase mb-1">{team.name}</p>
+              <div className="flex gap-4">
+                <p className="text-xs text-zinc-500 uppercase font-bold">Code: <span className="text-white bg-white/10 px-1.5 py-0.5 rounded ml-1">{team.code}</span></p>
+                <p className="text-xs text-zinc-500 uppercase font-bold">Members: <span className="text-zinc-300">{team._count.members}</span></p>
+                <p className="text-xs text-zinc-500 uppercase font-bold">Products: <span className="text-zinc-300">{team._count.products}</span></p>
+              </div>
             </div>
             <div className="flex gap-4">
               <button 
                 onClick={() => handleEdit(team)}
-                className="text-xs font-bold uppercase hover:text-zinc-300"
+                className="text-xs font-bold uppercase hover:text-white transition-colors"
               >
                 Edit
               </button>
               <button 
                 onClick={() => handleDelete(team.id)}
-                className="text-xs font-bold uppercase text-red-500 hover:text-red-400"
+                className="text-xs font-bold uppercase text-red-500 hover:text-red-400 transition-colors"
               >
                 Delete
               </button>
@@ -218,6 +240,7 @@ function ProductsTab() {
   const [teams, setTeams] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [filterTeam, setFilterTeam] = useState<string>('all');
   const [formData, setFormData] = useState({
     name: '', description: '', price: '', category: 'jerseys', teamId: '',
     sizes: 'S,M,L,XL,2XL', colors: 'Black,White'
@@ -284,16 +307,33 @@ function ProductsTab() {
     fetchData();
   };
 
+  const filteredProducts = products.filter(p => {
+    if (filterTeam === 'all') return true;
+    if (filterTeam === 'public') return !p.teamProducts || p.teamProducts.length === 0;
+    return p.teamProducts?.some((tp: any) => tp.teamId === filterTeam);
+  });
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl font-bold uppercase tracking-tighter">Apparel Catalog</h2>
-        <button 
-          onClick={() => { setIsAdding(true); setEditingId(null); setFormData({ name: '', description: '', price: '', category: 'jerseys', teamId: '', sizes: 'S,M,L,XL,2XL', colors: 'Black,White' }); }}
-          className="bg-white text-black px-4 py-2 rounded font-bold text-xs uppercase"
-        >
-          Add Product
-        </button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <select 
+            className="bg-zinc-900 border border-zinc-800 p-2 text-xs font-bold uppercase rounded flex-1 sm:w-64"
+            value={filterTeam}
+            onChange={e => setFilterTeam(e.target.value)}
+          >
+            <option value="all">Filter: Show All</option>
+            <option value="public">Filter: Public Collection</option>
+            {teams.map(t => <option key={t.id} value={t.id}>Filter: {t.name}</option>)}
+          </select>
+          <button 
+            onClick={() => { setIsAdding(true); setEditingId(null); setFormData({ name: '', description: '', price: '', category: 'jerseys', teamId: '', sizes: 'S,M,L,XL,2XL', colors: 'Black,White' }); }}
+            className="bg-white text-black px-4 py-2 rounded font-bold text-xs uppercase"
+          >
+            Add Product
+          </button>
+        </div>
       </div>
 
       {isAdding && (
@@ -302,7 +342,7 @@ function ProductsTab() {
           <div className="grid sm:grid-cols-2 gap-4">
             <input 
               placeholder="Product Name" 
-              className="bg-black border border-zinc-800 p-3 text-sm rounded"
+              className="bg-black border border-zinc-800 p-3 text-sm rounded w-full"
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
               required
@@ -310,7 +350,7 @@ function ProductsTab() {
             <input 
               placeholder="Price" 
               type="number" step="0.01"
-              className="bg-black border border-zinc-800 p-3 text-sm rounded"
+              className="bg-black border border-zinc-800 p-3 text-sm rounded w-full"
               value={formData.price}
               onChange={e => setFormData({...formData, price: e.target.value})}
               required
@@ -364,7 +404,7 @@ function ProductsTab() {
       )}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map(product => (
+        {filteredProducts.map(product => (
           <div key={product.id} className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
              <div className="flex justify-between items-start mb-2">
                 <p className="font-bold uppercase text-sm">{product.name}</p>
@@ -380,19 +420,22 @@ function ProductsTab() {
              <div className="flex gap-4">
                 <button 
                   onClick={() => handleEdit(product)}
-                  className="text-[10px] font-bold uppercase tracking-widest hover:text-zinc-300"
+                  className="text-[10px] font-bold uppercase tracking-widest hover:text-zinc-300 transition-colors"
                 >
                   Edit
                 </button>
                 <button 
                   onClick={() => handleDelete(product.id)}
-                  className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-400"
+                  className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors"
                 >
                   Delete
                 </button>
              </div>
           </div>
         ))}
+        {filteredProducts.length === 0 && (
+          <div className="col-span-full py-12 text-center text-zinc-500 uppercase font-bold text-xs tracking-widest">No products found in this category</div>
+        )}
       </div>
     </div>
   );
