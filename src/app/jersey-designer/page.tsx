@@ -96,21 +96,6 @@ export default function JerseyDesignerPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="border-b border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a href="/" className="text-2xl font-black tracking-tighter text-white">
-            8TWO
-          </a>
-          <nav className="flex gap-6 text-sm font-medium">
-            <a href="/shop" className="text-gray-400 hover:text-white transition-colors">SHOP</a>
-            <a href="/collections" className="text-gray-400 hover:text-white transition-colors">COLLECTIONS</a>
-            <a href="/jersey-designer" className="text-white">CUSTOM JERSEYS</a>
-            <a href="/about" className="text-gray-400 hover:text-white transition-colors">ABOUT</a>
-          </nav>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="mb-8">
