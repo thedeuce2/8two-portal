@@ -55,6 +55,7 @@ export interface CustomJerseyConfig {
   logoPosition: { x: number; y: number };
   logoScale: number;
   // Shared design (for team orders)
+  name: string;  // Individual name override
   sharedName?: string;
   nameFont: string;
   nameColor: string;
