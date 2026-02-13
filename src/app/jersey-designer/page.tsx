@@ -4,6 +4,9 @@ import React, { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useCart } from '@/context/CartContext';
 import { CustomJerseyConfig, TeamPlayer } from '@/types';
+import { products } from '@/data/products';
+
+const CUSTOM_JERSEY_PRODUCT = products.find(p => p.id === 'custom-jersey')!;
 
 // Dynamic import for preview to avoid SSR issues
 const JerseyPreview = dynamic(() => import('@/components/JerseyPreview'), { 
@@ -18,18 +21,6 @@ const JerseyPreview = dynamic(() => import('@/components/JerseyPreview'), {
 const JerseyControls = dynamic(() => import('@/components/JerseyControls'), { 
   ssr: false 
 });
-
-// Custom jersey product definition
-const CUSTOM_JERSEY_PRODUCT = {
-  id: 'custom-jersey',
-  name: '8TWO CUSTOM JERSEY',
-  description: 'Fully customized jersey with your choice of colors, logo, name, and number. Premium quality materials with professional stitching.',
-  price: 54.99,
-  category: 'jerseys',
-  sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
-  inStock: true,
-  isCustomJersey: true,
-};
 
 const defaultConfig: CustomJerseyConfig = {
   baseColor: '#1a1a1a',

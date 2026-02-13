@@ -20,6 +20,16 @@ export const BASE_SHIPPING = 9.99;
 
 export const products: Product[] = [
   {
+    id: 'custom-jersey',
+    name: '8TWO CUSTOM JERSEY',
+    description: 'Fully customized jersey with your choice of colors, logo, name, and number. Premium quality materials with professional stitching.',
+    price: 54.99,
+    category: 'jerseys',
+    sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+    inStock: true,
+    isCustomJersey: true,
+  },
+  {
     id: '1',
     name: '8TWO PREMIUM JERSEY',
     description: 'Heavyweight cotton jersey with spray paint graphic. Made for those who demand comfort and style.',

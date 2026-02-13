@@ -1,19 +1,36 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductGrid from '@/components/ProductGrid';
-import { products, categories } from '@/data/products';
+import { categories } from '@/data/products';
 
 function ShopContent() {
   const searchParams = useSearchParams();
   const categoryFilter = searchParams.get('category');
   
+  const [products, setProducts] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(categoryFilter || 'all');
   const [sortBy, setSortBy] = useState('featured');
+  const [loading, setLoading] = useState(true);
 
-  const filteredProducts = products
-    .filter(product => selectedCategory === 'all' || product.category === selectedCategory)
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/products?category=${selectedCategory}`);
+        const data = await res.json();
+        setProducts(data.products || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [selectedCategory]);
+
+  const filteredProducts = [...products]
     .sort((a, b) => {
       switch (sortBy) {
         case 'price-low':
@@ -36,7 +53,7 @@ function ShopContent() {
             Shop All
           </h1>
           <p className="text-gray-500 uppercase tracking-widest text-sm">
-            {filteredProducts.length} Products
+            {loading ? 'Loading...' : `${filteredProducts.length} Products`}
           </p>
         </div>
       </div>
@@ -102,7 +119,11 @@ function ShopContent() {
 
           {/* Product Grid */}
           <div className="flex-1">
-            <ProductGrid products={filteredProducts} />
+            {loading ? (
+              <div className="text-zinc-500 uppercase font-bold text-xs tracking-widest text-center py-12">Loading collection...</div>
+            ) : (
+              <ProductGrid products={filteredProducts} />
+            )}
           </div>
         </div>
       </div>

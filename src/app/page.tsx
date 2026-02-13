@@ -1,9 +1,20 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Hero from '@/components/Hero';
 import ProductGrid from '@/components/ProductGrid';
 import CategorySection from '@/components/CategorySection';
-import { products, categories } from '@/data/products';
+import { categories } from '@/data/products';
 
 export default function Home() {
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/products').then(r => r.json()).then(data => {
+      setProducts(data.products || []);
+    });
+  }, []);
+
   const featuredProducts = products.slice(0, 4);
   const newArrivals = products.slice(4, 8);
 

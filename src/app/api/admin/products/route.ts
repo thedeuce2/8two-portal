@@ -1,107 +1,64 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import { ProductFormData } from '@/types';
+import { getAuthUser } from '@/lib/auth';
 
-async function getUserId(): Promise<string | null> {
-  const cookieStore = await cookies();
-  const authToken = cookieStore.get('auth_token')?.value;
-  
-  if (!authToken) return null;
-  
-  const [userId] = Buffer.from(authToken, 'base64').toString('utf-8').split(':');
-  return userId || null;
-}
-
-async function isAdmin(userId: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { isAdmin: true },
-  });
-  return user?.isAdmin || false;
-}
-
-// GET - List all products
 export async function GET() {
-  try {
-    const userId = await getUserId();
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
-    }
-
-    if (!(await isAdmin(userId))) {
-      return NextResponse.json(
-        { error: 'Not authorized' },
-        { status: 403 }
-      );
-    }
-
-    const products = await prisma.product.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return NextResponse.json({ products });
-  } catch (error) {
-    console.error('Get products error:', error);
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    );
+  const user = await getAuthUser();
+  if (!user?.isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      teamProducts: {
+        include: {
+          team: {
+            select: { name: true, id: true }
+          }
+        }
+      }
+    }
+  });
+
+  return NextResponse.json({ products });
 }
 
-// POST - Create new product
 export async function POST(req: Request) {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const userId = await getUserId();
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
-    }
-
-    if (!(await isAdmin(userId))) {
-      return NextResponse.json(
-        { error: 'Not authorized' },
-        { status: 403 }
-      );
-    }
-
-    const data: ProductFormData = await req.json();
-
-    // Validate required fields
-    if (!data.name || !data.description || !data.category) {
-      return NextResponse.json(
-        { error: 'Name, description, and category are required' },
-        { status: 400 }
-      );
-    }
-
+    const data = await req.json();
     const product = await prisma.product.create({
       data: {
         name: data.name,
         description: data.description,
-        price: data.price,
+        price: parseFloat(data.price),
         category: data.category,
         image: data.image,
         sizes: data.sizes || [],
         colors: data.colors || [],
-        inStock: data.inStock,
-      },
+        inStock: data.inStock !== undefined ? data.inStock : true,
+      }
     });
+
+    // If a teamId is provided, also create a TeamProduct link
+    if (data.teamId) {
+      await prisma.teamProduct.create({
+        data: {
+          teamId: data.teamId,
+          productId: product.id,
+          price: product.price, // Default to product price
+        }
+      });
+    }
 
     return NextResponse.json({ product });
   } catch (error) {
-    console.error('Create product error:', error);
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    );
+    console.error('Failed to create product:', error);
+    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
   }
 }

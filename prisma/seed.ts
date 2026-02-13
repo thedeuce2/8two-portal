@@ -72,6 +72,40 @@ async function main() {
     }
   }
 
+  // Create initial products
+  const products = [
+    {
+      id: 'custom-jersey',
+      name: '8TWO CUSTOM JERSEY',
+      description: 'Fully customized jersey with your choice of colors, logo, name, and number.',
+      price: 54.99,
+      category: 'jerseys',
+      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+      colors: ['Black', 'White', 'Navy', 'Red'],
+      inStock: true,
+    },
+    {
+      name: '8TWO PREMIUM JERSEY',
+      description: 'Heavyweight cotton jersey with spray paint graphic.',
+      price: 49.99,
+      category: 'jerseys',
+      sizes: ['S', 'M', 'L', 'XL', '2XL'],
+      colors: ['Black', 'White'],
+      inStock: true,
+    }
+  ];
+
+  for (const product of products) {
+    const existing = await prisma.product.findUnique({
+      where: { id: product.id || 'none' },
+    });
+
+    if (!existing) {
+      await prisma.product.create({ data: product });
+      console.log(`✅ Created product: ${product.name}`);
+    }
+  }
+
   console.log('✅ Seeding complete!');
 }
 

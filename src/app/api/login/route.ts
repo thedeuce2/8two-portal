@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { createToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
@@ -34,13 +35,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create simple auth token (in production, use JWT)
-    const authToken = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+    // Create signed JWT
+    const authToken = await createToken({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isAdmin: user.isAdmin,
+    });
     
     const response = NextResponse.json({
       id: user.id,
       email: user.email,
       name: user.name,
+      isAdmin: user.isAdmin,
     });
 
     // Set auth cookie

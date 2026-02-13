@@ -56,6 +56,14 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {user ? (
               <>
+                {user.isAdmin && (
+                  <Link 
+                    href="/admin" 
+                    className="text-white bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-xs font-bold uppercase tracking-widest transition-all"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <Link 
                   href="/profile" 
                   className="text-white hover:text-gray-300 text-sm"
