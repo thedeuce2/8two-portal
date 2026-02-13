@@ -1,0 +1,126 @@
+// Prisma schema for 8TWO Streetwear
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?   // For credentials auth
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  teamMembers   TeamMember[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique // For URL: /shop/team/{slug}
+  code        String   @unique // Team code for users to join
+  description String?
+  logo        String?
+  colors      String?  // JSON array of team colors
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  members     TeamMember[]
+  products    TeamProduct[]
+  orders      Order[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  role      String   @default("member") // "admin" or "member"
+  joinedAt  DateTime @default(now())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, teamId])
+}
+
+model TeamProduct {
+  id          String  @id @default(cuid())
+  price       Float   // Can be team-specific pricing
+  
+  teamId      String
+  team        Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  productId   String
+  
+  @@unique([teamId, productId])
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  status          String   @default("pending") // pending, processing, shipped, delivered
+  total           Float
+  shippingCost    Float    @default(0)
+  discountApplied Float    @default(0) // Bulk discount
+  items           Int      // Total quantity
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Shipping info (simplified)
+  shippingName    String?
+  shippingAddress String?
+  shippingCity    String?
+  shippingZip     String?
+  
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  
+  teamId          String?
+  team            Team?    @relation(fields: [teamId], references: [id])
+}
