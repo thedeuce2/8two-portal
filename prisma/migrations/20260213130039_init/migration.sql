@@ -5,8 +5,8 @@ CREATE TABLE "User" (
     "name" TEXT,
     "password" TEXT,
     "image" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -31,7 +31,7 @@ CREATE TABLE "Session" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "sessionToken" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "expires" DATETIME NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE "Session" (
 CREATE TABLE "VerificationToken" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
-    "expires" DATETIME NOT NULL
+    "expires" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -51,15 +51,15 @@ CREATE TABLE "Team" (
     "description" TEXT,
     "logo" TEXT,
     "colors" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "TeamMember" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "role" TEXT NOT NULL DEFAULT 'member',
-    "joinedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" TEXT NOT NULL,
     "teamId" TEXT NOT NULL,
     CONSTRAINT "TeamMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -69,7 +69,7 @@ CREATE TABLE "TeamMember" (
 -- CreateTable
 CREATE TABLE "TeamProduct" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "price" REAL NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
     "teamId" TEXT NOT NULL,
     "productId" TEXT NOT NULL,
     CONSTRAINT "TeamProduct_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -79,12 +79,12 @@ CREATE TABLE "TeamProduct" (
 CREATE TABLE "Order" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "status" TEXT NOT NULL DEFAULT 'pending',
-    "total" REAL NOT NULL,
-    "shippingCost" REAL NOT NULL DEFAULT 0,
-    "discountApplied" REAL NOT NULL DEFAULT 0,
+    "total" DOUBLE PRECISION NOT NULL,
+    "shippingCost" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "discountApplied" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "items" INTEGER NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     "shippingName" TEXT,
     "shippingAddress" TEXT,
     "shippingCity" TEXT,
