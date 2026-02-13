@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient({
   datasourceUrl: process.env.DATABASE_URL,
@@ -7,6 +7,25 @@ const prisma = new PrismaClient({
 
 async function main() {
   console.log('🌱 Seeding database...');
+
+  // Create admin user
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: 'admin@test.com' },
+  });
+
+  if (!existingAdmin) {
+    const hashedPassword = await bcrypt.hash('test', 12);
+    await prisma.user.create({
+      data: {
+        email: 'admin@test.com',
+        name: 'Admin',
+        password: hashedPassword,
+      },
+    });
+    console.log('✅ Created admin user: admin@test.com / test');
+  } else {
+    console.log('⏭️  Admin user already exists');
+  }
 
   // Create demo teams
   const teams = [
@@ -16,6 +35,7 @@ async function main() {
       code: 'THUNDER25',
       description: 'Official team store for Thunder Basketball Club',
       colors: JSON.stringify(['#FFD700', '#1e3a5f']),
+      logo: '/logos/8twologo.jpg',
     },
     {
       name: 'Riverside Soccer',
@@ -23,6 +43,7 @@ async function main() {
       code: 'RIVER25',
       description: 'Riverside Soccer Club merchandise',
       colors: JSON.stringify(['#228b22', '#ffffff']),
+      logo: '/logos/8twologo.jpg',
     },
     {
       name: 'Metro Hockey',
@@ -30,6 +51,7 @@ async function main() {
       code: 'METRO25',
       description: 'Metro Hockey Association team store',
       colors: JSON.stringify(['#c41e3a', '#1a1a1a']),
+      logo: '/logos/8twologo.jpg',
     },
   ];
 
