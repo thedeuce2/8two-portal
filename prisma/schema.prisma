@@ -25,6 +25,20 @@ model User {
   teamMembers   TeamMember[]
 }
 
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  category    String
+  image       String?
+  sizes       String[]  // JSON array of available sizes
+  colors      String[]  // JSON array of available colors
+  inStock     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
