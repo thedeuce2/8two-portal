@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function Navbar() {
   const { state, toggleCart } = useCart();
-  const [user, setUser] = useState<{ id: string; email: string; name: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email: string; name: string; isAdmin?: boolean } | null>(null);
   const itemCount = state.items.reduce((count, item) => count + item.quantity, 0);
 
   useEffect(() => {
