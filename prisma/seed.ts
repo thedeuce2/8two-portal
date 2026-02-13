@@ -18,11 +18,17 @@ async function main() {
         email: 'admin@test.com',
         name: 'Admin',
         password: hashedPassword,
+        isAdmin: true,
       },
     });
     console.log('✅ Created admin user: admin@test.com / test');
   } else {
-    console.log('⏭️  Admin user already exists');
+    // Update existing user to be admin
+    await prisma.user.update({
+      where: { email: 'admin@test.com' },
+      data: { isAdmin: true },
+    });
+    console.log('✅ Admin user updated: admin@test.com');
   }
 
   // Create demo teams

@@ -12,6 +12,18 @@ export interface Product {
   isCustomJersey?: boolean;
 }
 
+// Product form data (for creating/editing)
+export interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string;
+  sizes: string[];
+  colors: string[];
+  inStock: boolean;
+}
+
 export interface CartItem {
   product: Product;
   quantity: number;
