@@ -95,87 +95,114 @@ export default function JerseyDesignerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-[#050505] text-white">
+      {/* Cinematic Background Gradient */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,_rgba(255,255,255,0.03)_0%,_transparent_50%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_90%_90%,_rgba(255,255,255,0.02)_0%,_transparent_40%)]" />
+      </div>
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-black text-white mb-2">CUSTOM JERSEY DESIGNER</h1>
-          <p className="text-gray-400">
+      <main className="max-w-7xl mx-auto px-6 py-12 relative z-10">
+        <div className="mb-12 border-b border-white/5 pb-8">
+          <p className="text-amber-500 font-black text-[10px] uppercase tracking-[0.4em] mb-3">Professional Grade</p>
+          <h1 className="text-6xl font-black text-white mb-4 italic tracking-tighter">CUSTOM JERSEY <span className="text-white/20">STUDIO</span></h1>
+          <p className="text-zinc-500 max-w-2xl font-medium leading-relaxed">
             {isTeamOrder 
-              ? 'Design once, customize for your entire team. Add each player with their name and number.' 
-              : 'Create your unique jersey with custom colors, logo, name, and number.'
+              ? 'Multi-player production suite. Individualized names and numbers for your entire roster with bulk-tier logistics.' 
+              : 'Precision customization interface. Configure your unique identifier with industrial-grade standards.'
             }
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-16">
           {/* Preview Section */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Preview</h2>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                 <div className="w-2 h-2 bg-amber-500 animate-pulse" />
+                 <h2 className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Live Visualizer v2.1</h2>
+              </div>
               
               {/* Player selector for team orders */}
               {isTeamOrder && config.useTeamNames && teamPlayers.length > 0 && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-4 py-2 rounded-lg">
                   <button
                     onClick={() => setSelectedPlayerIndex(Math.max(0, selectedPlayerIndex - 1))}
                     disabled={selectedPlayerIndex === 0}
-                    className="w-8 h-8 bg-zinc-800 text-white rounded disabled:opacity-30"
+                    className="text-white hover:text-amber-500 disabled:opacity-20 transition-colors"
                   >
-                    ‹
+                    PREV
                   </button>
-                  <span className="text-white text-sm">
-                    {teamPlayers[selectedPlayerIndex].name} #{teamPlayers[selectedPlayerIndex].number}
-                  </span>
+                  <div className="text-center min-w-[120px]">
+                    <p className="text-[9px] font-black text-white/30 uppercase leading-none mb-1">Inspecting</p>
+                    <p className="text-sm font-black italic uppercase">
+                      {teamPlayers[selectedPlayerIndex].name} #{teamPlayers[selectedPlayerIndex].number}
+                    </p>
+                  </div>
                   <button
                     onClick={() => setSelectedPlayerIndex(Math.min(teamPlayers.length - 1, selectedPlayerIndex + 1))}
                     disabled={selectedPlayerIndex === teamPlayers.length - 1}
-                    className="w-8 h-8 bg-zinc-800 text-white rounded disabled:opacity-30"
+                    className="text-white hover:text-amber-500 disabled:opacity-20 transition-colors"
                   >
-                    ›
+                    NEXT
                   </button>
                 </div>
               )}
             </div>
             
-            <JerseyPreview 
-              config={config} 
-              size={selectedSize}
-              playerName={currentPlayer?.name}
-              playerNumber={currentPlayer?.number}
-              previewOnly={isTeamOrder && config.useTeamNames}
-            />
+            <div className="relative group">
+              {/* Decorative corners */}
+              <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-amber-500/50 z-20" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-amber-500/50 z-20" />
+              
+              <div className="bg-[#0a0a0a] border border-white/5 shadow-2xl transition-all group-hover:border-white/10">
+                <JerseyPreview 
+                  config={config} 
+                  size={selectedSize}
+                  playerName={currentPlayer?.name}
+                  playerNumber={currentPlayer?.number}
+                  previewOnly={isTeamOrder && config.useTeamNames}
+                />
+              </div>
+            </div>
             
             {/* Size Selector for Preview */}
-            <div className="mt-4 flex justify-center gap-2">
-              {['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`px-3 py-1 text-sm rounded transition-colors ${
-                    selectedSize === size
-                      ? 'bg-white text-black'
-                      : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+            <div className="flex flex-col gap-3">
+              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Inspection Size</label>
+              <div className="flex justify-center gap-1">
+                {['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`flex-1 py-3 text-[10px] font-black transition-all border ${
+                      selectedSize === size
+                        ? 'bg-white text-black border-white'
+                        : 'bg-transparent text-white/30 border-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
             
             {/* Quick Stats for Team Orders */}
             {isTeamOrder && teamPlayers.length > 0 && (
-              <div className="mt-4 bg-zinc-900 rounded-lg p-4">
-                <h3 className="text-white font-bold text-sm mb-2">Team Roster ({teamPlayers.length} players)</h3>
-                <div className="flex flex-wrap gap-2">
+              <div className="bg-white/5 border border-white/5 p-6">
+                <div className="flex justify-between items-end mb-4">
+                  <h3 className="text-white font-black text-[10px] uppercase tracking-[0.2em]">Roster Manifest</h3>
+                  <span className="text-[10px] font-black text-amber-500">{teamPlayers.length} / 50</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {teamPlayers.map((player, idx) => (
                     <button
                       key={player.id}
                       onClick={() => setSelectedPlayerIndex(idx)}
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
+                      className={`px-3 py-2 text-[10px] font-black rounded transition-all border text-left truncate ${
                         selectedPlayerIndex === idx
-                          ? 'bg-white text-black'
-                          : 'bg-zinc-800 text-gray-300'
+                          ? 'bg-amber-500/20 text-amber-500 border-amber-500/30'
+                          : 'bg-white/5 text-white/30 border-white/5 hover:border-white/10'
                       }`}
                     >
                       {player.name} #{player.number}
@@ -187,66 +214,51 @@ export default function JerseyDesignerPage() {
           </div>
 
           {/* Controls Section */}
-          <JerseyControls
-            config={config}
-            onConfigChange={setConfig}
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            teamPlayers={teamPlayers}
-            onTeamPlayersChange={setTeamPlayers}
-            isTeamOrder={isTeamOrder}
-            onTeamOrderChange={setIsTeamOrder}
-            onAddToCart={handleAddToCart}
-            isAdding={isAdding}
-            price={CUSTOM_JERSEY_PRODUCT.price}
-          />
+          <div className="relative">
+             {/* Gradient underline for controls */}
+             <div className="absolute -top-4 left-0 w-24 h-1 bg-amber-500" />
+             <JerseyControls
+                config={config}
+                onConfigChange={setConfig}
+                quantity={quantity}
+                onQuantityChange={setQuantity}
+                teamPlayers={teamPlayers}
+                onTeamPlayersChange={setTeamPlayers}
+                isTeamOrder={isTeamOrder}
+                onTeamOrderChange={setIsTeamOrder}
+                onAddToCart={handleAddToCart}
+                isAdding={isAdding}
+                price={CUSTOM_JERSEY_PRODUCT.price}
+              />
+          </div>
         </div>
 
-        {/* Features */}
-        <div className="mt-16 grid md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="w-14 h-14 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+        {/* Features - High Tech Footer Style */}
+        <div className="mt-32 grid md:grid-cols-4 gap-8 border-t border-white/5 pt-16">
+          {[
+            { title: 'Industrial Quality', desc: 'Heavyweight cotton blends with double-stitched reinforcements.' },
+            { title: 'Fleet Logistics', desc: 'Automated roster processing for team-scale deployment.' },
+            { title: 'Rapid Execution', desc: 'Accelerated production cycle with 72-hour turnaround.' },
+            { title: 'Verified Assets', desc: 'Quality-controlled vector processing for all uploaded identifiers.' }
+          ].map((feature, i) => (
+            <div key={i} className="space-y-4">
+              <div className="flex items-center gap-4">
+                 <span className="text-[10px] font-black text-amber-500/40">0{i+1}</span>
+                 <h3 className="font-black text-white text-[11px] uppercase tracking-widest">{feature.title}</h3>
+              </div>
+              <p className="text-zinc-500 text-[11px] leading-relaxed font-medium">{feature.desc}</p>
             </div>
-            <h3 className="font-bold text-white text-sm mb-1">Premium Quality</h3>
-            <p className="text-gray-500 text-xs">Heavyweight cotton with durable prints.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-14 h-14 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h3 className="font-bold text-white text-sm mb-1">Team Orders</h3>
-            <p className="text-gray-500 text-xs">Bulk orders with individual customization.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-14 h-14 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="font-bold text-white text-sm mb-1">Fast Turnaround</h3>
-            <p className="text-gray-500 text-xs">Ships within 3-5 business days.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-14 h-14 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h3 className="font-bold text-white text-sm mb-1">Admin Logos</h3>
-            <p className="text-gray-500 text-xs">Curated logos for quality assurance.</p>
-          </div>
+          ))}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800 mt-16 py-8">
-        <div className="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
-          © 2026 8TWO Streetwear. All rights reserved.
+      <footer className="mt-32 py-12 bg-black border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+           <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">8TWO STRATEGIC APPAREL</div>
+           <div className="text-[10px] font-black text-white/20 uppercase tracking-widest">
+            © 2026 8TWO ENTERPRISE. ALL RIGHTS RESERVED.
+          </div>
         </div>
       </footer>
     </div>

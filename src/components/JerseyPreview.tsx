@@ -71,21 +71,56 @@ export default function JerseyPreview({
           className="w-full h-full drop-shadow-2xl"
           style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.4))' }}
         >
-          {/* Main Jersey Body */}
+          {/* Main Jersey Body with Gradient for Depth */}
+          <defs>
+            <linearGradient id="jerseyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={config.baseColor} />
+              <stop offset="50%" stopColor={config.baseColor} stopOpacity="0.8" />
+              <stop offset="100%" stopColor={config.baseColor} />
+            </linearGradient>
+            <filter id="innerShadow">
+              <feComponentTransfer in="SourceAlpha">
+                <feFuncA type="table" tableValues="1 0" />
+              </feComponentTransfer>
+              <feGaussianBlur stdDeviation="3" />
+              <feOffset dx="2" dy="2" result="offsetblur" />
+              <feFlood floodColor="black" floodOpacity="0.5" result="color" />
+              <feComposite in2="offsetblur" operator="in" />
+              <feComposite in2="SourceAlpha" operator="in" />
+              <feMerge>
+                <feMergeNode in="SourceGraphic" />
+                <feMergeNode />
+              </feMerge>
+            </filter>
+          </defs>
+
           <path
             d="M30 60 L10 80 L10 140 L25 145 L30 120 L30 260 L60 270 L60 280 L140 280 L140 270 L170 260 L170 120 L175 145 L190 140 L190 80 L170 60 L155 40 L140 50 L100 55 L60 50 L45 40 Z"
-            fill={config.baseColor}
+            fill="url(#jerseyGradient)"
             stroke={config.trimColor}
-            strokeWidth="2"
+            strokeWidth="1.5"
+            filter="url(#innerShadow)"
           />
           
-          {/* Collar */}
+          {/* Folds and Texture (Subtle) */}
+          <path d="M100 55 V280" stroke="black" strokeWidth="0.5" opacity="0.1" />
+          <path d="M60 270 Q100 275 140 270" fill="none" stroke="black" strokeWidth="1" opacity="0.1" />
+          
+          {/* Collar with shadow */}
           <path
             d="M60 50 Q100 65 140 50"
             fill="none"
             stroke={config.trimColor}
-            strokeWidth="3"
+            strokeWidth="4"
             strokeLinecap="round"
+            opacity="0.9"
+          />
+          <path
+            d="M60 50 Q100 64 140 50"
+            fill="none"
+            stroke="black"
+            strokeWidth="1"
+            opacity="0.2"
           />
           
           {/* Sleeve Trim Left */}
