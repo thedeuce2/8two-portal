@@ -187,6 +187,30 @@ export const JERSEY_DESIGNS: JerseyDesign[] = [
       side: 'accent2',
       collar: 'accent1'
     }
+  },
+  {
+    id: '8two-elite',
+    name: '8TWO Elite X1',
+    description: 'The flagship design. Complex paneling with high-contrast tactical accents.',
+    mapping: {
+      base: 'primary',
+      sleeve: 'accent1',
+      yoke: 'accent1',
+      side: 'accent2',
+      collar: 'accent2'
+    }
+  },
+  {
+    id: 'deuce-legacy',
+    name: 'Deuce Legacy',
+    description: 'Traditional athletic silhouette with modernized shoulder paneling.',
+    mapping: {
+      base: 'primary',
+      sleeve: 'primary',
+      yoke: 'accent2',
+      side: 'primary',
+      collar: 'accent1'
+    }
   }
 ];
 

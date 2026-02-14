@@ -155,7 +155,24 @@ export default function JerseyPreview({
         )}
       </div>
       
+      {/* HUD Info */}
+      <div className="absolute top-6 right-6 flex flex-col items-end gap-1 pointer-events-none opacity-40">
+        <div className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-2">Diagnostic Overlay</div>
+        <div className="flex gap-1 h-1 w-24">
+            <div className="flex-1 bg-white" />
+            <div className="flex-1 bg-white/40" />
+            <div className="flex-1 bg-white/20" />
+            <div className="flex-1 bg-white/10" />
+        </div>
+      </div>
+
       <div className="absolute bottom-6 right-6 flex flex-col items-end gap-1">
+        <div className="flex gap-2 mb-2 items-center">
+            <div className="text-[8px] font-black text-amber-500 uppercase tracking-widest italic animate-pulse">Sync Active</div>
+            <div className="w-1 h-3 bg-white/20" />
+            <div className="w-1 h-3 bg-white/10" />
+            <div className="w-1 h-3 bg-amber-500/40" />
+        </div>
         <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">Tactical Profile</span>
         <span className="text-xl font-black text-white italic uppercase tracking-tighter">{design.name}</span>
       </div>

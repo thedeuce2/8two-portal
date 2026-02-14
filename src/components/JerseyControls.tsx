@@ -73,15 +73,21 @@ export default function JerseyControls({
       <div className="flex justify-between items-start">
         <div className="space-y-1">
             <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Production Matrix</h2>
-            <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.3em]">Design-First Sublimation Suite</p>
+            <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                <p className="text-[9px] font-black text-amber-500/80 uppercase tracking-[0.3em]">8TWO Strategic Industrial Suite</p>
+            </div>
+        </div>
+        <div className="text-right flex flex-col items-end">
+            <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Matrix Status</span>
+            <span className="text-[10px] font-black text-green-500 uppercase tracking-widest italic">ONLINE // SECURE</span>
         </div>
       </div>
 
-      <div className="flex border-b border-white/10">
-        {[ { id: 'design', label: 'Template' }, { id: 'colors', label: 'Identity' }, { id: 'decoration', label: 'Graphics' }, { id: 'roster', label: 'Roster' } ].map(tab => (
-            <button key={tab.id} onClick={() => setActiveMatrix(tab.id as any)} className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeMatrix === tab.id ? 'text-white' : 'text-white/20 hover:text-white/40'}`}>
+      <div className="grid grid-cols-4 gap-1 p-1 bg-white/5 border border-white/10">
+        {[ { id: 'design', label: 'Template' }, { id: 'colors', label: 'Identity' }, { id: 'decoration', label: 'Graphics' }, { id: 'roster', label: 'Fleet' } ].map(tab => (
+            <button key={tab.id} onClick={() => setActiveMatrix(tab.id as any)} className={`py-3 text-[9px] font-black uppercase tracking-widest transition-all ${activeMatrix === tab.id ? 'bg-white text-black' : 'text-white/20 hover:text-white/40'}`}>
                 {tab.label}
-                {activeMatrix === tab.id && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]" />}
             </button>
         ))}
       </div>
