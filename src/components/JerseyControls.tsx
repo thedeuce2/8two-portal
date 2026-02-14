@@ -88,106 +88,89 @@ export default function JerseyControls({
   };
 
   return (
-    <div className="bg-zinc-900 rounded-xl p-6 space-y-6">
-      <h2 className="text-xl font-bold text-white mb-4">Customize Your Jersey</h2>
+    <div className="bg-[#0a0a0a] border border-white/5 p-8 space-y-10 relative">
+      <div className="flex justify-between items-start mb-4">
+        <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Configuration Matrix</h2>
+        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">v2.1.0-STABLE</span>
+      </div>
       
       {/* Order Type Toggle */}
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Order Type</label>
-        <div className="flex gap-2">
+      <div className="space-y-4">
+        <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Operational Mode</label>
+        <div className="flex gap-1">
           <button
             onClick={() => { onTeamOrderChange(false); }}
-            className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex-1 py-4 text-[11px] font-black uppercase tracking-widest transition-all border ${
               !isTeamOrder 
-                ? 'bg-white text-black' 
-                : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
+                ? 'bg-white text-black border-white' 
+                : 'bg-transparent text-white/30 border-white/5 hover:border-white/10'
             }`}
           >
-            Individual
+            Individual Unit
           </button>
           <button
             onClick={() => { onTeamOrderChange(true); }}
-            className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex-1 py-4 text-[11px] font-black uppercase tracking-widest transition-all border ${
               isTeamOrder 
-                ? 'bg-white text-black' 
-                : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
+                ? 'bg-white text-black border-white' 
+                : 'bg-transparent text-white/30 border-white/5 hover:border-white/10'
             }`}
           >
-            Team / Bulk
+            Fleet / Roster
           </button>
         </div>
       </div>
       
-      {/* Size Selection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          {isTeamOrder ? 'Default Size (for new players)' : 'Size'}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {JERSEY_SIZES.map((size) => (
-            <button
-              key={size}
-              onClick={() => isTeamOrder ? setNewPlayerSize(size) : updateConfig({ logoPosition: { ...config.logoPosition } })}
-              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-            >
-              {size}
-            </button>
-          ))}
+      {/* Visual Identity Colors */}
+      <div className="grid grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Primary Hull</label>
+          <div className="flex flex-wrap gap-2">
+            {JERSEY_COLORS.map((color) => (
+              <button
+                key={color.value}
+                onClick={() => updateConfig({ baseColor: color.value })}
+                className={`w-8 h-8 rounded-none border transition-all ${
+                  config.baseColor === color.value ? 'border-amber-500 scale-110' : 'border-white/10 hover:border-white/40'
+                }`}
+                style={{ backgroundColor: color.value }}
+                title={color.name}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-      
-      {/* Base Color */}
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Base Color</label>
-        <div className="flex flex-wrap gap-2">
-          {JERSEY_COLORS.map((color) => (
-            <button
-              key={color.value}
-              onClick={() => updateConfig({ baseColor: color.value })}
-              className={`w-10 h-10 rounded-full border-2 transition-all ${
-                config.baseColor === color.value ? 'border-white scale-110' : 'border-transparent hover:scale-105'
-              }`}
-              style={{ backgroundColor: color.value }}
-              title={color.name}
-            />
-          ))}
-        </div>
-      </div>
-      
-      {/* Trim Color */}
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Trim Color</label>
-        <div className="flex flex-wrap gap-2">
-          {JERSEY_COLORS.map((color) => (
-            <button
-              key={color.value}
-              onClick={() => updateConfig({ trimColor: color.value })}
-              className={`w-10 h-10 rounded-full border-2 transition-all ${
-                config.trimColor === color.value ? 'border-white scale-110' : 'border-transparent hover:scale-105'
-              }`}
-              style={{ backgroundColor: color.value }}
-              title={color.name}
-            />
-          ))}
+        <div className="space-y-4">
+          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Trim Accents</label>
+          <div className="flex flex-wrap gap-2">
+            {JERSEY_COLORS.map((color) => (
+              <button
+                key={color.value}
+                onClick={() => updateConfig({ trimColor: color.value })}
+                className={`w-8 h-8 rounded-none border transition-all ${
+                  config.trimColor === color.value ? 'border-amber-500 scale-110' : 'border-white/10 hover:border-white/40'
+                }`}
+                style={{ backgroundColor: color.value }}
+                title={color.name}
+              />
+            ))}
+          </div>
         </div>
       </div>
       
       {/* Logo Selection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Logo (Admin Approved)
-        </label>
+      <div className="space-y-4">
+        <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Strategic Identifier</label>
         
         {/* Category Filter */}
-        <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
+        <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-hide">
           {logoCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => setLogoCategory(cat)}
-              className={`px-3 py-1 text-xs rounded-full capitalize whitespace-nowrap transition-colors ${
+              className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${
                 logoCategory === cat 
-                  ? 'bg-white text-black' 
-                  : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
+                  ? 'bg-amber-500 text-black border-amber-500' 
+                  : 'bg-white/5 text-white/30 border-white/5 hover:border-white/10'
               }`}
             >
               {cat}
@@ -201,12 +184,12 @@ export default function JerseyControls({
             <button
               key={logo.id}
               onClick={() => updateConfig({ logoImage: logo.imageUrl })}
-              className={`aspect-square bg-zinc-800 rounded-lg p-2 border-2 transition-all hover:bg-zinc-700 ${
-                config.logoImage === logo.imageUrl ? 'border-white' : 'border-transparent'
+              className={`aspect-square bg-white/[0.02] border transition-all hover:bg-white/5 flex items-center justify-center p-2 ${
+                config.logoImage === logo.imageUrl ? 'border-amber-500' : 'border-white/5'
               }`}
               title={logo.name}
             >
-              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+              <div className="text-[8px] font-black text-white/20 uppercase text-center leading-none">
                 {logo.name}
               </div>
             </button>
@@ -215,35 +198,38 @@ export default function JerseyControls({
         
         {/* Custom Upload (optional) */}
         <details className="group">
-          <summary className="text-sm text-gray-400 cursor-pointer hover:text-white transition-colors">
-            Or upload custom logo (will be reviewed)
+          <summary className="text-[9px] font-black text-white/20 uppercase tracking-widest cursor-pointer hover:text-white transition-colors">
+            Import External Asset
           </summary>
-          <div className="mt-3">
-            <label className="flex-1 cursor-pointer">
+          <div className="mt-4 p-4 bg-white/5 border border-dashed border-white/10">
+            <label className="cursor-pointer block">
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleLogoUpload}
                 className="hidden"
               />
-              <div className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-3 rounded-lg text-center transition-colors">
-                {config.logoImage ? 'Change Logo' : 'Choose File'}
+              <div className="w-full bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest py-4 border border-white/10 text-center transition-all">
+                {config.logoImage ? 'Re-upload Asset' : 'Select Source File'}
               </div>
             </label>
             {config.logoImage && (
               <button
                 onClick={() => updateConfig({ logoImage: undefined })}
-                className="mt-2 text-red-400 hover:text-red-300 text-sm"
+                className="mt-3 text-red-500/50 hover:text-red-500 text-[9px] font-black uppercase tracking-widest w-full text-center"
               >
-                Remove custom logo
+                Purge Asset
               </button>
             )}
           </div>
         </details>
         
         {config.logoImage && (
-          <div className="mt-3">
-            <label className="block text-xs text-gray-400 mb-1">Logo Scale</label>
+          <div className="mt-6 space-y-3">
+            <div className="flex justify-between items-end">
+               <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Asset Scale</label>
+               <span className="text-[10px] font-black text-white italic">{Math.round(config.logoScale * 100)}%</span>
+            </div>
             <input
               type="range"
               min="0.5"
@@ -251,7 +237,7 @@ export default function JerseyControls({
               step="0.1"
               value={config.logoScale}
               onChange={(e) => updateConfig({ logoScale: parseFloat(e.target.value) })}
-              className="w-full accent-white"
+              className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer"
             />
           </div>
         )}
@@ -259,134 +245,133 @@ export default function JerseyControls({
       
       {/* Team Names Toggle (only in team mode) */}
       {isTeamOrder && (
-        <div className="bg-zinc-800/50 rounded-lg p-4">
-          <label className="flex items-center gap-3 cursor-pointer">
+        <div className="bg-amber-500/5 border border-amber-500/10 p-6">
+          <label className="flex items-center gap-4 cursor-pointer group">
+            <div className={`w-5 h-5 border transition-all flex items-center justify-center ${config.useTeamNames ? 'bg-amber-500 border-amber-500' : 'bg-transparent border-white/20 group-hover:border-white/40'}`}>
+               {config.useTeamNames && <span className="text-black text-[10px] font-black italic">✓</span>}
+            </div>
             <input
               type="checkbox"
               checked={config.useTeamNames}
               onChange={(e) => updateConfig({ useTeamNames: e.target.checked })}
-              className="w-5 h-5 rounded border-gray-600 bg-zinc-700 text-white focus:ring-white"
+              className="hidden"
             />
-            <span className="text-white font-medium">Use individual player names</span>
+            <span className="text-xs font-black uppercase tracking-widest text-white/80">Enable Individual Roster Serialization</span>
           </label>
-          <p className="text-gray-400 text-xs mt-1 ml-8">
-            Each player will have their own name and number. Uncheck to use shared design.
+          <p className="text-white/20 text-[9px] font-medium mt-3 ml-9 uppercase tracking-tighter">
+            Assign unique designators to each unit in the fleet.
           </p>
         </div>
       )}
       
       {/* Shared Name/Number (for non-team or shared design) */}
       {(!isTeamOrder || !config.useTeamNames) && (
-        <>
+        <div className="space-y-8 pt-6 border-t border-white/5">
           {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
+          <div className="space-y-4">
+            <div className="flex justify-between items-end">
+               <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Tactical Name</label>
+               <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">MAX 15 CHARS</span>
+            </div>
             <input
               type="text"
               value={config.name}
               onChange={(e) => updateConfig({ name: e.target.value.toUpperCase() })}
               placeholder="YOUR NAME"
               maxLength={15}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white"
+              className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-4 text-white text-lg font-black placeholder-white/10 focus:outline-none focus:border-amber-500 italic transition-all"
             />
-            <div className="flex gap-4 mt-2">
-              <div className="flex-1">
-                <label className="block text-xs text-gray-400 mb-1">Font</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Typeface</label>
                 <select
                   value={config.nameFont}
                   onChange={(e) => updateConfig({ nameFont: e.target.value })}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-none px-3 py-3 text-white text-[10px] font-black uppercase appearance-none focus:border-amber-500 outline-none"
                 >
                   {JERSEY_FONTS.map((font) => (
-                    <option key={font.value} value={font.value}>{font.name}</option>
+                    <option key={font.value} value={font.value} className="bg-black">{font.name}</option>
                   ))}
                 </select>
               </div>
-              <div className="flex-1">
-                <label className="block text-xs text-gray-400 mb-1">Color</label>
-                <input
-                  type="color"
-                  value={config.nameColor}
-                  onChange={(e) => updateConfig({ nameColor: e.target.value })}
-                  className="w-full h-10 bg-zinc-800 border border-zinc-700 rounded-lg cursor-pointer"
-                />
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Chroma</label>
+                <div className="flex items-center h-[46px] bg-white/5 border border-white/10 px-3">
+                   <input
+                    type="color"
+                    value={config.nameColor}
+                    onChange={(e) => updateConfig({ nameColor: e.target.value })}
+                    className="w-full h-6 bg-transparent cursor-pointer border-none"
+                  />
+                </div>
               </div>
             </div>
           </div>
           
           {/* Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Jersey Number</label>
+          <div className="space-y-4">
+            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Unit Designation</label>
             <input
               type="text"
               value={config.number}
               onChange={(e) => updateConfig({ number: e.target.value.replace(/\D/g, '').slice(0, 2) })}
               placeholder="00"
               maxLength={2}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white text-center text-2xl font-bold"
+              className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-6 text-white text-5xl font-black placeholder-white/5 focus:outline-none focus:border-amber-500 text-center italic transition-all"
             />
-            <div className="flex gap-4 mt-2">
-              <div className="flex-1">
-                <label className="block text-xs text-gray-400 mb-1">Font</label>
-                <select
-                  value={config.numberFont}
-                  onChange={(e) => updateConfig({ numberFont: e.target.value })}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm"
-                >
-                  {JERSEY_FONTS.map((font) => (
-                    <option key={font.value} value={font.value}>{font.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex-1">
-                <label className="block text-xs text-gray-400 mb-1">Color</label>
-                <input
-                  type="color"
-                  value={config.numberColor}
-                  onChange={(e) => updateConfig({ numberColor: e.target.value })}
-                  className="w-full h-10 bg-zinc-800 border border-zinc-700 rounded-lg cursor-pointer"
-                />
-              </div>
-            </div>
-            <div className="mt-2">
-              <label className="block text-xs text-gray-400 mb-1">Number Position</label>
-              <div className="flex gap-2">
-                {(['front', 'back', 'both'] as const).map((pos) => (
-                  <button
-                    key={pos}
-                    onClick={() => updateConfig({ numberPosition: pos })}
-                    className={`flex-1 py-2 rounded-lg text-sm capitalize transition-colors ${
-                      config.numberPosition === pos 
-                        ? 'bg-white text-black' 
-                        : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
-                    }`}
+            <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-2">
+                  <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Typeface</label>
+                  <select
+                    value={config.numberFont}
+                    onChange={(e) => updateConfig({ numberFont: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-none px-3 py-3 text-white text-[10px] font-black uppercase appearance-none focus:border-amber-500 outline-none"
                   >
-                    {pos}
-                  </button>
-                ))}
-              </div>
+                    {JERSEY_FONTS.map((font) => (
+                      <option key={font.value} value={font.value} className="bg-black">{font.name}</option>
+                    ))}
+                  </select>
+               </div>
+               <div className="space-y-2">
+                  <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Positioning</label>
+                  <div className="flex gap-1">
+                    {(['front', 'back', 'both'] as const).map((pos) => (
+                      <button
+                        key={pos}
+                        onClick={() => updateConfig({ numberPosition: pos })}
+                        className={`flex-1 py-3 text-[9px] font-black uppercase transition-all border ${
+                          config.numberPosition === pos 
+                            ? 'bg-white text-black border-white' 
+                            : 'bg-white/5 text-white/30 border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        {pos}
+                      </button>
+                    ))}
+                  </div>
+               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
       
       {/* Team Players List (team order mode) */}
       {isTeamOrder && config.useTeamNames && (
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Add Players ({teamPlayers.length} added)
+        <div className="space-y-6 pt-6 border-t border-white/5">
+          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
+            Deployment Roster ({teamPlayers.length})
           </label>
           
           {/* Add Player Form */}
-          <div className="bg-zinc-800 rounded-lg p-4 mb-3">
-            <div className="grid grid-cols-3 gap-2 mb-2">
+          <div className="bg-white/5 border border-white/10 p-6 space-y-4">
+            <div className="grid grid-cols-3 gap-2">
               <input
                 type="text"
                 value={newPlayerName}
                 onChange={(e) => setNewPlayerName(e.target.value)}
-                placeholder="Name"
+                placeholder="ID"
                 maxLength={15}
-                className="bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-white text-sm placeholder-gray-400"
+                className="bg-black/40 border border-white/10 px-3 py-3 text-white text-[11px] font-black italic placeholder-white/10 focus:border-amber-500 outline-none uppercase"
               />
               <input
                 type="text"
@@ -394,40 +379,40 @@ export default function JerseyControls({
                 onChange={(e) => setNewPlayerNumber(e.target.value)}
                 placeholder="#"
                 maxLength={2}
-                className="bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-white text-sm placeholder-gray-400"
+                className="bg-black/40 border border-white/10 px-3 py-3 text-white text-[11px] font-black italic placeholder-white/10 focus:border-amber-500 outline-none text-center"
               />
               <select
                 value={newPlayerSize}
                 onChange={(e) => setNewPlayerSize(e.target.value)}
-                className="bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-white text-sm"
+                className="bg-black/40 border border-white/10 px-3 py-3 text-white text-[10px] font-black uppercase appearance-none"
               >
                 {JERSEY_SIZES.map((size) => (
-                  <option key={size} value={size}>{size}</option>
+                  <option key={size} value={size} className="bg-black">{size}</option>
                 ))}
               </select>
             </div>
             <button
               onClick={addPlayer}
               disabled={!newPlayerName.trim() || !newPlayerNumber.trim()}
-              className="w-full bg-white text-black py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors"
+              className="w-full bg-white text-black py-4 text-[11px] font-black uppercase tracking-widest disabled:opacity-20 hover:bg-amber-500 transition-all"
             >
-              Add Player
+              Authorize Unit
             </button>
           </div>
           
           {/* Players List */}
           {teamPlayers.length > 0 && (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="space-y-1 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
               {teamPlayers.map((player) => (
-                <div key={player.id} className="flex items-center justify-between bg-zinc-800 rounded-lg px-3 py-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-white font-bold w-8">#{player.number}</span>
-                    <span className="text-white">{player.name}</span>
-                    <span className="text-gray-400 text-sm">({player.size})</span>
+                <div key={player.id} className="flex items-center justify-between bg-white/[0.02] border border-white/5 px-4 py-3 group hover:border-white/20 transition-all">
+                  <div className="flex items-center gap-4">
+                    <span className="text-amber-500 font-black italic w-6 text-sm">#{player.number}</span>
+                    <span className="text-white font-black text-[11px] uppercase italic tracking-tighter">{player.name}</span>
+                    <span className="text-white/20 text-[9px] font-black uppercase">[{player.size}]</span>
                   </div>
                   <button
                     onClick={() => removePlayer(player.id)}
-                    className="text-red-400 hover:text-red-300"
+                    className="text-white/10 hover:text-red-500 transition-colors"
                   >
                     ✕
                   </button>
@@ -435,58 +420,37 @@ export default function JerseyControls({
               ))}
             </div>
           )}
-          
-          {teamPlayers.length === 0 && (
-            <p className="text-gray-400 text-sm text-center py-4">
-              Add at least one player to continue
-            </p>
-          )}
         </div>
       )}
       
-      {/* Quantity (only for individual orders) */}
-      {!isTeamOrder && (
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Quantity</label>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-              className="w-12 h-12 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-2xl flex items-center justify-center"
-            >
-              -
-            </button>
-            <span className="text-2xl font-bold text-white w-12 text-center">{quantity}</span>
-            <button
-              onClick={() => onQuantityChange(Math.min(10, quantity + 1))}
-              className="w-12 h-12 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-2xl flex items-center justify-center"
-            >
-              +
-            </button>
+      {/* Price & Execution */}
+      <div className="pt-10 border-t border-white/10 relative">
+        {/* Decorative scanline */}
+        <div className="absolute top-0 right-0 w-16 h-[1px] bg-amber-500" />
+        
+        <div className="flex justify-between items-end mb-8">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">
+              Transaction Total
+            </span>
+            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">
+              {isTeamOrder 
+                ? `${getTeamQuantity()} UNITS SERIALIZED` 
+                : `${quantity} UNIT PRODUCTION`
+              }
+            </span>
           </div>
+          <span className="text-4xl font-black text-white italic tracking-tighter tabular-nums">${(price * getTeamQuantity()).toFixed(2)}</span>
         </div>
-      )}
-      
-      {/* Price & Add to Cart */}
-      <div className="pt-4 border-t border-zinc-700">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-gray-400">
-            {isTeamOrder 
-              ? `Total (${getTeamQuantity()} jerseys)` 
-              : `Total (${quantity} jersey${quantity > 1 ? 's' : ''})`
-            }
-          </span>
-          <span className="text-2xl font-bold text-white">${(price * getTeamQuantity()).toFixed(2)}</span>
-        </div>
+        
         <button
           onClick={onAddToCart}
           disabled={isAdding || (isTeamOrder && config.useTeamNames && teamPlayers.length === 0)}
-          className="w-full bg-white hover:bg-gray-200 text-black font-bold py-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-white hover:bg-amber-500 text-black font-black py-6 text-xs uppercase tracking-[0.4em] transition-all disabled:opacity-20 shadow-[0_0_50px_rgba(255,255,255,0.05)]"
         >
           {isAdding 
-            ? 'Adding...' 
-            : isTeamOrder 
-              ? `Add ${getTeamQuantity()} Jerseys to Cart`
-              : `Add ${quantity} Jersey${quantity > 1 ? 's' : ''} to Cart`
+            ? 'EXECUTING...' 
+            : 'INITIALIZE PRODUCTION'
           }
         </button>
       </div>
