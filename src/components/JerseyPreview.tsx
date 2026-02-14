@@ -42,9 +42,9 @@ export default function JerseyPreview({
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
-    // Constrain to jersey area (roughly)
-    const constrainedX = Math.max(20, Math.min(80, x));
-    const constrainedY = Math.max(15, Math.min(85, y));
+    // Constrain to jersey area
+    const constrainedX = Math.max(15, Math.min(85, x));
+    const constrainedY = Math.max(10, Math.min(90, y));
     
     if (dragTarget === 'logo') {
       onConfigChange?.({ logoPosition: { x: constrainedX, y: constrainedY } });
@@ -70,116 +70,154 @@ export default function JerseyPreview({
   return (
     <div 
       ref={containerRef}
-      className="relative bg-zinc-900 rounded-lg p-8 overflow-hidden select-none"
-      style={{ minHeight: '550px' }}
+      className="relative bg-zinc-950 rounded-lg p-8 overflow-hidden select-none border border-white/5 shadow-inner"
+      style={{ minHeight: '600px' }}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* View Toggle */}
-      <div className="absolute top-4 left-4 flex gap-1 z-30">
-        <button 
-          onClick={() => setView('front')}
-          className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all border ${view === 'front' ? 'bg-white text-black border-white' : 'bg-white/5 text-white/30 border-white/5 hover:border-white/20'}`}
-        >
-          Front
-        </button>
-        <button 
-          onClick={() => setView('back')}
-          className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all border ${view === 'back' ? 'bg-white text-black border-white' : 'bg-white/5 text-white/30 border-white/5 hover:border-white/20'}`}
-        >
-          Back
-        </button>
+      {/* HUD Background Decorations */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+         <div className="absolute top-0 left-[20%] w-px h-full bg-white/10" />
+         <div className="absolute top-0 right-[20%] w-px h-full bg-white/10" />
       </div>
 
-      {/* Jersey Container */}
+      {/* View Toggle */}
+      <div className="absolute top-6 left-6 flex flex-col gap-2 z-30">
+        <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] mb-1">Perspective Control</span>
+        <div className="flex gap-1 bg-black/40 p-1 border border-white/10 rounded-sm">
+            <button 
+                onClick={() => setView('front')}
+                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${view === 'front' ? 'bg-white text-black' : 'text-white/30 hover:text-white/60'}`}
+            >
+                Front
+            </button>
+            <button 
+                onClick={() => setView('back')}
+                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${view === 'back' ? 'bg-white text-black' : 'text-white/30 hover:text-white/60'}`}
+            >
+                Back
+            </button>
+        </div>
+      </div>
+
+      {/* Jersey Scale Visualizer */}
       <div 
-        className="relative mx-auto transition-all duration-500 ease-in-out"
+        className="relative mx-auto transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1)"
         style={{ 
-          width: '280px',
-          height: '380px',
+          width: '320px',
+          height: '420px',
           transform: `scale(${scale})`,
           transformOrigin: 'top center',
-          marginTop: '40px'
+          marginTop: '60px'
         }}
       >
-        {/* Jersey SVG */}
+        {/* SVG Renderer */}
         <svg
           viewBox="0 0 200 280"
-          className="w-full h-full drop-shadow-2xl"
-          style={{ filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.6))' }}
+          className="w-full h-full drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
         >
           <defs>
-            <linearGradient id="jerseyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={config.baseColor} />
-              <stop offset="50%" stopColor={config.baseColor} stopOpacity="0.8" />
-              <stop offset="100%" stopColor={config.baseColor} />
+            <linearGradient id="panelGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+               <stop offset="0%" stopColor="#ffffff" stopOpacity="0.1" />
+               <stop offset="50%" stopColor="#ffffff" stopOpacity="0" />
+               <stop offset="100%" stopColor="#ffffff" stopOpacity="0.1" />
             </linearGradient>
-            <filter id="innerShadow">
-              <feComponentTransfer in="SourceAlpha">
-                <feFuncA type="table" tableValues="1 0" />
-              </feComponentTransfer>
-              <feGaussianBlur stdDeviation="3" />
-              <feOffset dx="2" dy="2" result="offsetblur" />
-              <feFlood floodColor="black" floodOpacity="0.5" result="color" />
-              <feComposite in2="offsetblur" operator="in" />
-              <feComposite in2="SourceAlpha" operator="in" />
-              <feMerge>
-                <feMergeNode in="SourceGraphic" />
-                <feMergeNode />
-              </feMerge>
+
+            {/* Patterns */}
+            <pattern id="meshPattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+               <path d="M5 0 L10 5 L5 10 L0 5 Z" fill="none" stroke={config.patternColor} strokeWidth="0.5" opacity={config.patternOpacity} />
+            </pattern>
+
+            <pattern id="geometricPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+               <rect width="20" height="40" fill={config.patternColor} opacity={config.patternOpacity} />
+            </pattern>
+
+            <pattern id="camoPattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+               <circle cx="20" cy="20" r="15" fill={config.patternColor} opacity={config.patternOpacity} />
+               <circle cx="60" cy="70" r="25" fill={config.patternColor} opacity={config.patternOpacity} />
+               <circle cx="80" cy="30" r="10" fill={config.patternColor} opacity={config.patternOpacity} />
+            </pattern>
+
+            <filter id="fabricTexture">
+              <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
+              <feDiffuseLighting in="noise" lightingColor="white" surfaceScale="1" result="diffuse">
+                <feDistantLight azimuth="45" elevation="60" />
+              </feDiffuseLighting>
+              <feComposite operator="in" in="diffuse" in2="SourceGraphic" />
             </filter>
           </defs>
 
-          {/* Main Jersey Body */}
+          {/* SIDE PANELS */}
           <path
-            d="M30 60 L30 260 L60 270 L60 280 L140 280 L140 270 L170 260 L170 60 L155 40 L140 50 L100 55 L60 50 L45 40 Z"
-            fill="url(#jerseyGradient)"
-            stroke="none"
-            filter="url(#innerShadow)"
+            d="M30 120 L10 140 L10 260 L30 260 Z"
+            fill={config.sidePanelColor}
+          />
+          <path
+            d="M170 120 L190 140 L190 260 L170 260 Z"
+            fill={config.sidePanelColor}
           />
 
-          {/* Left Sleeve */}
+          {/* MAIN BODY PANEL */}
+          <path
+            d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z"
+            fill={config.baseColor}
+          />
+          
+          {/* APPLY PATTERN OVER MAIN BODY */}
+          {config.pattern !== 'none' && (
+            <path
+              d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z"
+              fill={`url(#${config.pattern}Pattern)`}
+              pointerEvents="none"
+            />
+          )}
+
+          {/* YOKE / SHOULDERS */}
+          <path
+            d="M30 60 L60 50 L100 55 L140 50 L170 60 L155 40 L45 40 Z"
+            fill={config.yokeColor}
+          />
+
+          {/* SLEEVES */}
           <path
             d="M30 60 L10 80 L10 140 L25 145 L30 120 Z"
-            fill={config.accentSleeves ? config.trimColor : "url(#jerseyGradient)"}
-            stroke="rgba(0,0,0,0.1)"
-            strokeWidth="1"
+            fill={config.sleeveColor}
           />
-
-          {/* Right Sleeve */}
           <path
             d="M170 60 L190 80 L190 140 L175 145 L170 120 Z"
-            fill={config.accentSleeves ? config.trimColor : "url(#jerseyGradient)"}
-            stroke="rgba(0,0,0,0.1)"
-            strokeWidth="1"
-          />
-          
-          {/* Folds and Texture (Subtle) */}
-          <path d="M100 55 V280" stroke="black" strokeWidth="0.5" opacity="0.1" />
-          <path d="M60 270 Q100 275 140 270" fill="none" stroke="black" strokeWidth="1" opacity="0.1" />
-          
-          {/* Collar */}
-          <path
-            d="M60 50 Q100 65 140 50"
-            fill="none"
-            stroke={config.accentSleeves ? config.trimColor : "none"}
-            strokeWidth={config.accentSleeves ? "12" : "0"}
-            strokeLinecap="round"
-            opacity="0.9"
-          />
-          {/* Internal Seam line for collar */}
-          <path
-            d="M60 50 Q100 65 140 50"
-            fill="none"
-            stroke="black"
-            strokeWidth="1"
-            opacity="0.1"
+            fill={config.sleeveColor}
           />
 
+          {/* COLLAR TRIM */}
+          <path
+            d="M60 50 Q100 65 140 50"
+            fill="none"
+            stroke={config.collarColor}
+            strokeWidth="10"
+            strokeLinecap="round"
+          />
+
+          {/* OVERLAY DEPTH & SHADOWS */}
+          <path
+            d="M30 60 L10 80 L10 140 L25 145 L30 120 L30 260 L60 280 L140 280 L170 260 L170 120 L175 145 L190 140 L190 80 L170 60 L155 40 L100 55 L45 40 Z"
+            fill="url(#panelGradient)"
+            pointerEvents="none"
+            opacity="0.3"
+          />
+
+          {/* SEAMS (Faint definition) */}
+          <path d="M30 60 V260" stroke="black" strokeWidth="0.5" opacity="0.2" />
+          <path d="M170 60 V260" stroke="black" strokeWidth="0.5" opacity="0.2" />
+          <path d="M30 60 L45 40" stroke="black" strokeWidth="0.5" opacity="0.2" />
+          <path d="M170 60 L155 40" stroke="black" strokeWidth="0.5" opacity="0.2" />
+
+          {/* DECORATIONS */}
           {view === 'front' ? (
             <>
-              {/* Team Name on Front - DRAGGABLE */}
+              {/* Team Name - DRAGGABLE */}
               {config.teamName && (
                 <text
                   x="100"
@@ -189,6 +227,8 @@ export default function JerseyPreview({
                   fontSize={18 * config.teamNameScale}
                   fontWeight="black"
                   fill={config.nameColor}
+                  stroke={config.teamNameOutlineColor}
+                  strokeWidth={config.nameOutlineWidth}
                   className={`uppercase italic tracking-tighter ${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
                   style={{ letterSpacing: '2px' }}
                   onMouseDown={() => handleMouseDown('teamName')}
@@ -207,6 +247,8 @@ export default function JerseyPreview({
                   fontSize={48 * config.numberScale}
                   fontWeight="black"
                   fill={config.numberColor}
+                  stroke={config.numberOutlineColor}
+                  strokeWidth={config.numberOutlineWidth}
                   opacity="0.9"
                   className={`${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
                   onMouseDown={() => handleMouseDown('number')}
@@ -227,6 +269,8 @@ export default function JerseyPreview({
                   fontSize={18 * config.nameScale}
                   fontWeight="black"
                   fill={config.nameColor}
+                  stroke={config.nameOutlineColor}
+                  strokeWidth={config.nameOutlineWidth}
                   className={`uppercase italic ${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
                   onMouseDown={() => handleMouseDown('name')}
                 >
@@ -244,8 +288,8 @@ export default function JerseyPreview({
                   fontSize={96 * config.numberScale}
                   fontWeight="black"
                   fill={config.numberColor}
-                  stroke={config.trimColor}
-                  strokeWidth="1"
+                  stroke={config.numberOutlineColor}
+                  strokeWidth={config.numberOutlineWidth * 2}
                   className={`${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
                   onMouseDown={() => handleMouseDown('number')}
                 >
@@ -269,12 +313,12 @@ export default function JerseyPreview({
             onMouseDown={() => handleMouseDown('logo')}
           >
             {!previewOnly && (
-               <div className="absolute inset-0 border border-amber-500/20 rounded scale-125 opacity-0 group-hover:opacity-100" />
+               <div className="absolute inset-0 border border-amber-500/20 rounded scale-150 opacity-0 group-hover:opacity-100 animate-pulse" />
             )}
             <img 
               src={config.logoImage} 
               alt="Custom Logo" 
-              className="max-w-16 max-h-16 object-contain drop-shadow-lg"
+              className="max-w-20 max-h-20 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
               draggable={false}
             />
           </div>
@@ -282,21 +326,29 @@ export default function JerseyPreview({
       </div>
       
       {/* HUD Info */}
-      <div className="absolute bottom-4 right-4 flex flex-col items-end gap-1">
-        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Projection Angle</span>
-        <span className="text-sm font-black text-white italic uppercase">{view} View</span>
+      <div className="absolute bottom-6 right-6 flex flex-col items-end gap-1">
+        <div className="flex gap-2 mb-2">
+            <div className="w-1 h-3 bg-white/20" />
+            <div className="w-1 h-3 bg-white/10" />
+            <div className="w-1 h-3 bg-amber-500/40" />
+        </div>
+        <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">Sublimation Profile</span>
+        <span className="text-xl font-black text-white italic uppercase tracking-tighter">{view} PHASE</span>
       </div>
       
-      {/* Color Swatches */}
-      <div className="absolute bottom-4 left-4 flex gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[8px] font-black text-white/20 uppercase">Hull</span>
-          <div className="w-8 h-2 bg-white/5 border border-white/10" style={{ backgroundColor: config.baseColor }} />
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-[8px] font-black text-white/20 uppercase">Trim</span>
-          <div className="w-8 h-2 bg-white/5 border border-white/10" style={{ backgroundColor: config.trimColor }} />
-        </div>
+      {/* Zone Indicators */}
+      <div className="absolute bottom-6 left-6 flex gap-4">
+        {[
+            { label: 'Base', color: config.baseColor },
+            { label: 'Sleeve', color: config.sleeveColor },
+            { label: 'Yoke', color: config.yokeColor },
+            { label: 'Side', color: config.sidePanelColor }
+        ].map(zone => (
+            <div key={zone.label} className="flex flex-col gap-1">
+                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest">{zone.label}</span>
+                <div className="w-6 h-1.5" style={{ backgroundColor: zone.color }} />
+            </div>
+        ))}
       </div>
     </div>
   );

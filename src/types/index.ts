@@ -61,28 +61,47 @@ export interface ApprovedLogo {
 
 // Custom jersey configuration
 export interface CustomJerseyConfig {
+  // Color Zones
   baseColor: string;
-  trimColor: string;
-  accentSleeves: boolean;
+  sleeveColor: string;
+  collarColor: string;
+  sidePanelColor: string;
+  yokeColor: string; // Shoulder area
+  
+  // Patterns
+  pattern?: 'none' | 'gradient' | 'camo' | 'geometric' | 'mesh';
+  patternColor: string;
+  patternOpacity: number;
+
+  // Assets
   logoImage?: string;
   logoPosition: { x: number; y: number };
   logoScale: number;
-  // Shared design (for team orders)
+  
+  // Text Elements
   name: string;  
   namePosition: { y: number };
   nameScale: number;
+  nameFont: string;
+  nameColor: string;
+  nameOutlineColor: string;
+  nameOutlineWidth: number;
+
   teamName?: string;
   teamNamePosition: { y: number };
   teamNameScale: number;
-  nameFont: string;
-  nameColor: string;
+  teamNameOutlineColor: string;
+
   number: string;
   numberPosition: { y: number };
   numberScale: number;
   numberFont: string;
   numberColor: string;
+  numberOutlineColor: string;
+  numberOutlineWidth: number;
   numberType: 'front' | 'back' | 'both';
-  // For team orders, players override shared name/number
+
+  // State
   useTeamNames?: boolean;
 }
 

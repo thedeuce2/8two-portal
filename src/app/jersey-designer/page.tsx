@@ -12,8 +12,8 @@ const CUSTOM_JERSEY_PRODUCT = products.find(p => p.id === 'custom-jersey')!;
 const JerseyPreview = dynamic(() => import('@/components/JerseyPreview'), { 
   ssr: false,
   loading: () => (
-    <div className="bg-zinc-900 rounded-lg p-8 flex items-center justify-center" style={{ minHeight: '500px' }}>
-      <div className="text-gray-400">Loading preview...</div>
+    <div className="bg-zinc-900 rounded-lg p-8 flex items-center justify-center" style={{ minHeight: '600px' }}>
+      <div className="text-gray-400">Loading projection system...</div>
     </div>
   )
 });
@@ -24,24 +24,40 @@ const JerseyControls = dynamic(() => import('@/components/JerseyControls'), {
 
 const defaultConfig: CustomJerseyConfig = {
   baseColor: '#1a1a1a',
-  trimColor: '#ffffff',
-  accentSleeves: false,
+  sleeveColor: '#1a1a1a',
+  collarColor: '#ffffff',
+  sidePanelColor: '#1a1a1a',
+  yokeColor: '#1a1a1a',
+  
+  pattern: 'none',
+  patternColor: '#ffffff',
+  patternOpacity: 0.1,
+
   logoPosition: { x: 50, y: 35 },
   logoScale: 1,
+  
   name: '',
   namePosition: { y: 20 },
   nameScale: 1,
   nameFont: 'Arial Black, sans-serif',
   nameColor: '#ffffff',
+  nameOutlineColor: '#000000',
+  nameOutlineWidth: 0,
+
   teamName: '',
   teamNamePosition: { y: 25 },
   teamNameScale: 1,
+  teamNameOutlineColor: '#000000',
+
   number: '',
   numberPosition: { y: 50 },
   numberScale: 1,
   numberFont: 'Impact, sans-serif',
   numberColor: '#ffffff',
+  numberOutlineColor: '#000000',
+  numberOutlineWidth: 0,
   numberType: 'back',
+
   useTeamNames: false,
 };
 
@@ -114,11 +130,11 @@ export default function JerseyDesignerPage() {
       <main className="max-w-7xl mx-auto px-6 py-12 relative z-10">
         <div className="mb-12 border-b border-white/5 pb-8">
           <p className="text-amber-500 font-black text-[10px] uppercase tracking-[0.4em] mb-3">Professional Grade</p>
-          <h1 className="text-6xl font-black text-white mb-4 italic tracking-tighter">CUSTOM JERSEY <span className="text-white/20">STUDIO</span></h1>
+          <h1 className="text-6xl font-black text-white mb-4 italic tracking-tighter uppercase">Sublimation <span className="text-white/20">Studio</span></h1>
           <p className="text-zinc-500 max-w-2xl font-medium leading-relaxed">
             {isTeamOrder 
-              ? 'Multi-player production suite. Individualized names and numbers for your entire roster with bulk-tier logistics.' 
-              : 'Precision customization interface. Configure your unique identifier with industrial-grade standards.'
+              ? 'Multi-zone fleet deployment. Sublimated patterns and individual serialized roster assignment.' 
+              : 'Precision unit configurator. Access multi-layer color zones and advanced fabric patterns.'
             }
           </p>
         </div>
@@ -129,7 +145,7 @@ export default function JerseyDesignerPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                  <div className="w-2 h-2 bg-amber-500 animate-pulse" />
-                 <h2 className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Live Visualizer v2.1</h2>
+                 <h2 className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Projection Matrix v3.0</h2>
               </div>
               
               {/* Player selector for team orders */}
@@ -143,7 +159,7 @@ export default function JerseyDesignerPage() {
                     PREV
                   </button>
                   <div className="text-center min-w-[120px]">
-                    <p className="text-[9px] font-black text-white/30 uppercase leading-none mb-1">Inspecting</p>
+                    <p className="text-[9px] font-black text-white/30 uppercase leading-none mb-1">UNIT</p>
                     <p className="text-sm font-black italic uppercase">
                       {teamPlayers[selectedPlayerIndex].name} #{teamPlayers[selectedPlayerIndex].number}
                     </p>
@@ -204,8 +220,6 @@ export default function JerseyDesignerPage() {
 
           {/* Controls Section */}
           <div className="relative">
-             {/* Gradient underline for controls */}
-             <div className="absolute -top-4 left-0 w-24 h-1 bg-amber-500" />
              <JerseyControls
                 config={config}
                 onConfigChange={setConfig}
@@ -227,7 +241,7 @@ export default function JerseyDesignerPage() {
         {/* Features - High Tech Footer Style */}
         <div className="mt-32 grid md:grid-cols-4 gap-8 border-t border-white/5 pt-16">
           {[
-            { title: 'Industrial Quality', desc: 'Heavyweight cotton blends with double-stitched reinforcements.' },
+            { title: 'Full Sublimation', desc: 'Colors and patterns are printed directly into the fabric fibers for zero-fade performance.' },
             { title: 'Fleet Logistics', desc: 'Automated roster processing for team-scale deployment.' },
             { title: 'Rapid Execution', desc: 'Accelerated production cycle with 72-hour turnaround.' },
             { title: 'Verified Assets', desc: 'Quality-controlled vector processing for all uploaded identifiers.' }
