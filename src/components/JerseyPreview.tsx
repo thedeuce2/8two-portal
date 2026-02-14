@@ -135,8 +135,7 @@ export default function JerseyPreview({
           <path
             d="M30 60 L30 260 L60 270 L60 280 L140 280 L140 270 L170 260 L170 60 L155 40 L140 50 L100 55 L60 50 L45 40 Z"
             fill="url(#jerseyGradient)"
-            stroke={config.trimColor}
-            strokeWidth="0.5"
+            stroke="none"
             filter="url(#innerShadow)"
           />
 
@@ -144,16 +143,16 @@ export default function JerseyPreview({
           <path
             d="M30 60 L10 80 L10 140 L25 145 L30 120 Z"
             fill={config.accentSleeves ? config.trimColor : "url(#jerseyGradient)"}
-            stroke={config.trimColor}
-            strokeWidth="0.5"
+            stroke="rgba(0,0,0,0.1)"
+            strokeWidth="1"
           />
 
           {/* Right Sleeve */}
           <path
             d="M170 60 L190 80 L190 140 L175 145 L170 120 Z"
             fill={config.accentSleeves ? config.trimColor : "url(#jerseyGradient)"}
-            stroke={config.trimColor}
-            strokeWidth="0.5"
+            stroke="rgba(0,0,0,0.1)"
+            strokeWidth="1"
           />
           
           {/* Folds and Texture (Subtle) */}
@@ -164,10 +163,18 @@ export default function JerseyPreview({
           <path
             d="M60 50 Q100 65 140 50"
             fill="none"
-            stroke={config.accentSleeves ? config.trimColor : config.trimColor}
-            strokeWidth={config.accentSleeves ? "8" : "4"}
+            stroke={config.accentSleeves ? config.trimColor : "none"}
+            strokeWidth={config.accentSleeves ? "12" : "0"}
             strokeLinecap="round"
             opacity="0.9"
+          />
+          {/* Internal Seam line for collar */}
+          <path
+            d="M60 50 Q100 65 140 50"
+            fill="none"
+            stroke="black"
+            strokeWidth="1"
+            opacity="0.1"
           />
 
           {view === 'front' ? (
