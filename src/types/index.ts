@@ -63,6 +63,7 @@ export interface ApprovedLogo {
 export interface CustomJerseyConfig {
   baseColor: string;
   trimColor: string;
+  accentSleeves: boolean;
   logoImage?: string;
   logoPosition: { x: number; y: number };
   logoScale: number;

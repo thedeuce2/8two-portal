@@ -25,6 +25,7 @@ const JerseyControls = dynamic(() => import('@/components/JerseyControls'), {
 const defaultConfig: CustomJerseyConfig = {
   baseColor: '#1a1a1a',
   trimColor: '#ffffff',
+  accentSleeves: false,
   logoPosition: { x: 50, y: 35 },
   logoScale: 1,
   name: '',

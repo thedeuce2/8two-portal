@@ -166,7 +166,15 @@ export default function JerseyControls({
           </div>
         </div>
         <div className="space-y-4">
-          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Trim Accents</label>
+          <div className="flex justify-between items-start">
+             <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Accent Color</label>
+             <button 
+                onClick={() => updateConfig({ accentSleeves: !config.accentSleeves })}
+                className={`text-[8px] font-black uppercase px-2 py-0.5 border transition-all ${config.accentSleeves ? 'bg-amber-500 text-black border-amber-500' : 'text-white/20 border-white/10'}`}
+             >
+                {config.accentSleeves ? 'Enabled' : 'Disabled'}
+             </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {JERSEY_COLORS.map((color) => (
               <button
@@ -180,6 +188,9 @@ export default function JerseyControls({
               />
             ))}
           </div>
+          <p className="text-[8px] text-white/20 uppercase tracking-tighter italic">
+            Enable to apply accents to sleeves and collar.
+          </p>
         </div>
       </div>
       
