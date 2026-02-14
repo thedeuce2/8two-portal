@@ -28,6 +28,7 @@ const defaultConfig: CustomJerseyConfig = {
   accent2Color: '#333333',
   
   patternOpacity: 0.1,
+  customTemplateColor: 'accent1',
 
   logoPosition: { x: 50, y: 35 },
   logoScale: 1,

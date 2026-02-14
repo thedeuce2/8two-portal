@@ -45,6 +45,19 @@ export default function JerseyControls({
   const [newPlayerSize, setNewPlayerSize] = useState('M');
   const [activeMatrix, setActiveMatrix] = useState<'design' | 'colors' | 'decoration' | 'roster'>('design');
 
+  const handleCustomTemplateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          updateConfig({ customTemplateUrl: event.target.result as string });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const addPlayer = () => {
     if (!newPlayerName.trim() || !newPlayerNumber.trim()) return;
     onTeamPlayersChange([...teamPlayers, { id: uuidv4(), name: newPlayerName.toUpperCase().slice(0, 15), number: newPlayerNumber.replace(/\D/g, '').slice(0, 2), size: newPlayerSize }]);
@@ -78,14 +91,28 @@ export default function JerseyControls({
            <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Select Tactical Base</label>
            <div className="grid grid-cols-1 gap-2">
               {JERSEY_DESIGNS.map(d => (
-                 <button key={d.id} onClick={() => updateConfig({ designId: d.id })} className={`flex flex-col p-6 border transition-all text-left group ${config.designId === d.id ? 'bg-white text-black border-white' : 'bg-white/5 text-white/40 border-white/5 hover:border-white/10'}`}>
+                 <button key={d.id} onClick={() => updateConfig({ designId: d.id, customTemplateUrl: undefined })} className={`flex flex-col p-6 border transition-all text-left group ${config.designId === d.id && !config.customTemplateUrl ? 'bg-white text-black border-white' : 'bg-white/5 text-white/40 border-white/5 hover:border-white/10'}`}>
                     <div className="flex justify-between items-start">
                        <span className="text-lg font-black italic uppercase tracking-tighter">{d.name}</span>
-                       {config.designId === d.id && <span className="text-[10px] font-bold">ACTIVE</span>}
+                       {config.designId === d.id && !config.customTemplateUrl && <span className="text-[10px] font-bold">ACTIVE</span>}
                     </div>
-                    <p className={`text-[10px] font-medium mt-1 leading-relaxed ${config.designId === d.id ? 'text-black/60' : 'text-white/20'}`}>{d.description}</p>
+                    <p className={`text-[10px] font-medium mt-1 leading-relaxed ${config.designId === d.id && !config.customTemplateUrl ? 'text-black/60' : 'text-white/20'}`}>{d.description}</p>
                  </button>
               ))}
+           </div>
+
+           <div className="pt-8 border-t border-white/5">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] block mb-4">Import Custom Asset Pattern</label>
+              <div className={`p-6 border-2 border-dashed transition-all ${config.customTemplateUrl ? 'border-amber-500/50 bg-amber-500/5' : 'border-white/10 bg-white/[0.02]'}`}>
+                 <input type="file" accept="image/*" onChange={handleCustomTemplateUpload} className="hidden" id="template-upload" />
+                 <label htmlFor="template-upload" className="cursor-pointer block text-center">
+                    <p className="text-sm font-black text-white uppercase italic">{config.customTemplateUrl ? 'Replace Pattern Asset' : 'Upload Design Asset'}</p>
+                    <p className="text-[9px] text-white/40 mt-2 uppercase tracking-tighter">Required: Transparent PNG (White patterns work best)</p>
+                 </label>
+                 {config.customTemplateUrl && (
+                    <button onClick={() => updateConfig({ customTemplateUrl: undefined })} className="w-full mt-4 text-[9px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-all">Clear Custom Asset</button>
+                 )}
+              </div>
            </div>
         </div>
       )}
@@ -94,7 +121,17 @@ export default function JerseyControls({
         <div className="space-y-10 animate-in fade-in duration-500">
            {[ { id: 'primaryColor', label: 'Primary Hull' }, { id: 'accent1Color', label: 'Secondary Accent' }, { id: 'accent2Color', label: 'Tertiary Accent' } ].map(zone => (
                <div key={zone.id} className="space-y-4">
-                   <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">{zone.label}</label>
+                   <div className="flex justify-between items-end">
+                       <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">{zone.label}</label>
+                       {config.customTemplateUrl && (zone.id === 'accent1Color' || zone.id === 'accent2Color') && (
+                          <button 
+                            onClick={() => updateConfig({ customTemplateColor: zone.id === 'accent1Color' ? 'accent1' : 'accent2' })}
+                            className={`text-[8px] font-black uppercase px-1.5 border ${config.customTemplateColor === (zone.id === 'accent1Color' ? 'accent1' : 'accent2') ? 'bg-amber-500 border-amber-500 text-black' : 'border-white/10 text-white/20'}`}
+                          >
+                            Apply to Custom Asset
+                          </button>
+                       )}
+                   </div>
                    <div className="flex flex-wrap gap-2">
                        {JERSEY_COLORS.map((color) => (
                            <button key={color.value} onClick={() => updateConfig({ [zone.id]: color.value })} className={`w-8 h-8 rounded-none border transition-all ${ (config as any)[zone.id] === color.value ? 'border-amber-500 scale-110' : 'border-white/5 hover:border-white/20' }`} style={{ backgroundColor: color.value }} />
@@ -106,8 +143,8 @@ export default function JerseyControls({
                </div>
            ))}
            <div className="pt-6 border-t border-white/5 space-y-4">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Pattern Intensity</label>
-                <input type="range" min="0.05" max="0.6" step="0.05" value={config.patternOpacity} onChange={(e) => updateConfig({ patternOpacity: parseFloat(e.target.value) })} className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer" />
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Pattern Intensity / Opacity</label>
+                <input type="range" min="0.05" max="0.8" step="0.05" value={config.patternOpacity} onChange={(e) => updateConfig({ patternOpacity: parseFloat(e.target.value) })} className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer" />
            </div>
         </div>
       )}
@@ -169,7 +206,10 @@ export default function JerseyControls({
                 <div className="space-y-1 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                     {teamPlayers.map((player) => (
                         <div key={player.id} className="flex items-center justify-between bg-white/[0.02] border border-white/5 px-4 py-3 group hover:border-white/20 transition-all">
-                            <div className="flex items-center gap-4"><span className="text-amber-500 font-black italic w-6 text-sm">#{player.number}</span><span className="text-white font-black text-[11px] uppercase italic">{player.name}</span><span className="text-white/20 text-[9px] font-black uppercase">[{player.size}]</span></div>
+                            <div className="flex items-center gap-4">
+                                <span className="text-amber-500 font-black italic w-6 text-sm">#{player.number}</span>
+                                <span className="text-white font-black text-[11px] uppercase italic">{player.name}</span>
+                                <span className="text-white/20 text-[9px] font-black uppercase">[{player.size}]</span></div>
                             <button onClick={() => onTeamPlayersChange(teamPlayers.filter(p => p.id !== player.id))} className="text-white/10 hover:text-red-500 transition-colors">✕</button>
                         </div>
                     ))}

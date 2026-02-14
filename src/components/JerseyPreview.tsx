@@ -55,6 +55,9 @@ export default function JerseyPreview({
   const scaleMap: Record<string, number> = { 'XS': 0.85, 'S': 0.9, 'M': 1.0, 'L': 1.1, 'XL': 1.2, '2XL': 1.3, '3XL': 1.4, '4XL': 1.5 };
   const scale = scaleMap[size] || 1.0;
 
+  // Custom re-coloring filter for uploaded white PNGs
+  const filterColor = config.customTemplateColor === 'accent1' ? config.accent1Color : config.accent2Color;
+
   return (
     <div ref={containerRef} className="relative bg-zinc-950 rounded-lg p-8 overflow-hidden select-none border border-white/5 shadow-inner" style={{ minHeight: '600px' }} onMouseMove={handleMouseMove} onMouseUp={() => setDragTarget(null)} onMouseLeave={() => setDragTarget(null)}>
       <div className="absolute top-6 left-6 flex flex-col gap-2 z-30">
@@ -75,24 +78,46 @@ export default function JerseyPreview({
                <path d="M0 40 L40 0 L200 160 L160 200 Z" fill={config.accent1Color} opacity={config.patternOpacity * 0.5} />
                <path d="M200 40 L160 0 L0 160 L40 200 Z" fill={config.accent2Color} opacity={config.patternOpacity * 0.5} />
             </pattern>
+
+            {/* Custom Template Re-color Filter */}
+            <filter id="templateColorFilter">
+                <feFlood floodColor={filterColor} result="flood" />
+                <feComposite in="flood" in2="SourceAlpha" operator="in" />
+            </filter>
           </defs>
 
-          {/* SIDE PANELS */}
-          <path d="M30 120 L10 140 L10 260 L30 260 Z" fill={getColor('side')} />
-          <path d="M170 120 L190 140 L190 260 L170 260 Z" fill={getColor('side')} />
+          <g mask="url(#jerseyMask)">
+            {/* SIDE PANELS */}
+            <path d="M30 120 L10 140 L10 260 L30 260 Z" fill={getColor('side')} />
+            <path d="M170 120 L190 140 L190 260 L170 260 Z" fill={getColor('side')} />
 
-          {/* MAIN BODY PANEL */}
-          <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={getColor('base')} />
-          {design.pattern && (
-            <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={`url(#${design.pattern}Pattern)`} pointerEvents="none" />
-          )}
+            {/* MAIN BODY PANEL */}
+            <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={getColor('base')} />
+            
+            {/* BUILT-IN PATTERNS */}
+            {design.pattern && (
+                <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={`url(#${design.pattern}Pattern)`} pointerEvents="none" />
+            )}
 
-          {/* YOKE / SHOULDERS */}
-          <path d="M30 60 L60 50 L100 55 L140 50 L170 60 L155 40 L45 40 Z" fill={getColor('yoke')} />
+            {/* CUSTOM UPLOADED ASSET OVERLAY */}
+            {config.customTemplateUrl && (
+                <image 
+                    href={config.customTemplateUrl} 
+                    x="0" y="40" width="200" height="240" 
+                    preserveAspectRatio="xMidYMid slice"
+                    filter="url(#templateColorFilter)"
+                    opacity={config.patternOpacity + 0.3}
+                    pointerEvents="none"
+                />
+            )}
 
-          {/* SLEEVES */}
-          <path d="M30 60 L10 80 L10 140 L25 145 L30 120 Z" fill={getColor('sleeve')} />
-          <path d="M170 60 L190 80 L190 140 L175 145 L170 120 Z" fill={getColor('sleeve')} />
+            {/* YOKE / SHOULDERS */}
+            <path d="M30 60 L60 50 L100 55 L140 50 L170 60 L155 40 L45 40 Z" fill={getColor('yoke')} />
+
+            {/* SLEEVES */}
+            <path d="M30 60 L10 80 L10 140 L25 145 L30 120 Z" fill={getColor('sleeve')} />
+            <path d="M170 60 L190 80 L190 140 L175 145 L170 120 Z" fill={getColor('sleeve')} />
+          </g>
 
           {/* COLLAR TRIM */}
           <path d="M60 50 Q100 65 140 50" fill="none" stroke={getColor('collar')} strokeWidth="10" strokeLinecap="round" />

@@ -59,6 +59,7 @@ export interface ApprovedLogo {
   isPremium?: boolean;
 }
 
+// Custom jersey design template
 export interface JerseyDesign {
   id: string;
   name: string;
@@ -73,6 +74,8 @@ export interface JerseyDesign {
     collar: 'primary' | 'accent1' | 'accent2';
   };
   pattern?: 'none' | 'mesh' | 'geometric' | 'camo' | 'aerial';
+  overlayImage?: string; // Path to a transparent PNG pattern (stars, stripes, etc)
+  overlayColor?: 'primary' | 'accent1' | 'accent2';
 }
 
 // Custom jersey configuration
@@ -82,8 +85,12 @@ export interface CustomJerseyConfig {
   accent1Color: string;
   accent2Color: string;
   
-  // Patterns (now linked to design or manual override)
+  // Patterns (linked to design or manual override)
   patternOpacity: number;
+  
+  // Custom Overlays (Uploaded by user)
+  customTemplateUrl?: string;
+  customTemplateColor: 'accent1' | 'accent2';
 
   // Assets
   logoImage?: string;
