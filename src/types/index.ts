@@ -59,18 +59,30 @@ export interface ApprovedLogo {
   isPremium?: boolean;
 }
 
+export interface JerseyDesign {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail?: string;
+  // How the 3 colors map to the 5 internal zones
+  mapping: {
+    base: 'primary' | 'accent1' | 'accent2';
+    sleeve: 'primary' | 'accent1' | 'accent2';
+    yoke: 'primary' | 'accent1' | 'accent2';
+    side: 'primary' | 'accent1' | 'accent2';
+    collar: 'primary' | 'accent1' | 'accent2';
+  };
+  pattern?: 'none' | 'mesh' | 'geometric' | 'camo' | 'aerial';
+}
+
 // Custom jersey configuration
 export interface CustomJerseyConfig {
-  // Color Zones
-  baseColor: string;
-  sleeveColor: string;
-  collarColor: string;
-  sidePanelColor: string;
-  yokeColor: string; // Shoulder area
+  designId: string;
+  primaryColor: string;
+  accent1Color: string;
+  accent2Color: string;
   
-  // Patterns
-  pattern?: 'none' | 'gradient' | 'camo' | 'geometric' | 'mesh';
-  patternColor: string;
+  // Patterns (now linked to design or manual override)
   patternOpacity: number;
 
   // Assets
@@ -104,6 +116,72 @@ export interface CustomJerseyConfig {
   // State
   useTeamNames?: boolean;
 }
+
+export const JERSEY_DESIGNS: JerseyDesign[] = [
+  {
+    id: 'classic',
+    name: 'Classic Solid',
+    description: 'Clean, professional single-tone base with subtle accents.',
+    mapping: {
+      base: 'primary',
+      sleeve: 'primary',
+      yoke: 'primary',
+      side: 'primary',
+      collar: 'accent1'
+    }
+  },
+  {
+    id: 'aerial',
+    name: 'Aerial Elite',
+    description: 'Angular speed panels with high-contrast shoulder yokes.',
+    pattern: 'aerial',
+    mapping: {
+      base: 'primary',
+      sleeve: 'accent1',
+      yoke: 'accent2',
+      side: 'accent1',
+      collar: 'accent2'
+    }
+  },
+  {
+    id: 'striker',
+    name: 'Striker Vertical',
+    description: 'Aggressive vertical side inserts for a slim, athletic look.',
+    mapping: {
+      base: 'primary',
+      sleeve: 'primary',
+      yoke: 'primary',
+      side: 'accent1',
+      collar: 'accent1'
+    }
+  },
+  {
+    id: 'stealth',
+    name: 'Stealth Camo',
+    description: 'Subdued digital patterns across the main body panels.',
+    pattern: 'camo',
+    mapping: {
+      base: 'primary',
+      sleeve: 'accent1',
+      yoke: 'primary',
+      side: 'accent1',
+      collar: 'accent1'
+    }
+  },
+  {
+    id: 'velocity',
+    name: 'Velocity Mesh',
+    description: 'Technical hexagon mesh panels for high-performance aesthetic.',
+    pattern: 'mesh',
+    mapping: {
+      base: 'primary',
+      sleeve: 'accent2',
+      yoke: 'primary',
+      side: 'accent2',
+      collar: 'accent1'
+    }
+  }
+];
 
 export const JERSEY_COLORS = [
   { name: 'Black', value: '#1a1a1a' },
