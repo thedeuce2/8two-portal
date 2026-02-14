@@ -267,10 +267,22 @@ export default function JerseyControls({
       {/* Shared Name/Number (for non-team or shared design) */}
       {(!isTeamOrder || !config.useTeamNames) && (
         <div className="space-y-8 pt-6 border-t border-white/5">
+          {/* Team Name */}
+          <div className="space-y-4">
+            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Corporate/Team Name (Front)</label>
+            <input
+              type="text"
+              value={config.teamName || ''}
+              onChange={(e) => updateConfig({ teamName: e.target.value.toUpperCase() })}
+              placeholder="ENTER TEAM NAME"
+              className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-4 text-white text-lg font-black placeholder-white/10 focus:outline-none focus:border-amber-500 italic transition-all"
+            />
+          </div>
+
           {/* Name */}
           <div className="space-y-4">
             <div className="flex justify-between items-end">
-               <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Tactical Name</label>
+               <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Tactical Name (Back)</label>
                <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">MAX 15 CHARS</span>
             </div>
             <input

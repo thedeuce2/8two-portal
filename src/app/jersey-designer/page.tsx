@@ -163,6 +163,7 @@ export default function JerseyDesignerPage() {
                   playerName={currentPlayer?.name}
                   playerNumber={currentPlayer?.number}
                   previewOnly={isTeamOrder && config.useTeamNames}
+                  onPositionChange={(pos) => setConfig({ ...config, logoPosition: pos })}
                 />
               </div>
             </div>
