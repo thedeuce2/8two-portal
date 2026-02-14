@@ -67,14 +67,20 @@ export interface CustomJerseyConfig {
   logoPosition: { x: number; y: number };
   logoScale: number;
   // Shared design (for team orders)
-  name: string;  // Individual name override
+  name: string;  
+  namePosition: { y: number };
+  nameScale: number;
   teamName?: string;
+  teamNamePosition: { y: number };
+  teamNameScale: number;
   nameFont: string;
   nameColor: string;
   number: string;
+  numberPosition: { y: number };
+  numberScale: number;
   numberFont: string;
   numberColor: string;
-  numberPosition: 'front' | 'back' | 'both';
+  numberType: 'front' | 'back' | 'both';
   // For team orders, players override shared name/number
   useTeamNames?: boolean;
 }

@@ -28,12 +28,19 @@ const defaultConfig: CustomJerseyConfig = {
   logoPosition: { x: 50, y: 35 },
   logoScale: 1,
   name: '',
+  namePosition: { y: 20 },
+  nameScale: 1,
   nameFont: 'Arial Black, sans-serif',
   nameColor: '#ffffff',
+  teamName: '',
+  teamNamePosition: { y: 25 },
+  teamNameScale: 1,
   number: '',
+  numberPosition: { y: 50 },
+  numberScale: 1,
   numberFont: 'Impact, sans-serif',
   numberColor: '#ffffff',
-  numberPosition: 'front',
+  numberType: 'back',
   useTeamNames: false,
 };
 
@@ -163,28 +170,8 @@ export default function JerseyDesignerPage() {
                   playerName={currentPlayer?.name}
                   playerNumber={currentPlayer?.number}
                   previewOnly={isTeamOrder && config.useTeamNames}
-                  onPositionChange={(pos) => setConfig({ ...config, logoPosition: pos })}
+                  onConfigChange={(updates) => setConfig({ ...config, ...updates })}
                 />
-              </div>
-            </div>
-            
-            {/* Size Selector for Preview */}
-            <div className="flex flex-col gap-3">
-              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest">Inspection Size</label>
-              <div className="flex justify-center gap-1">
-                {['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`flex-1 py-3 text-[10px] font-black transition-all border ${
-                      selectedSize === size
-                        ? 'bg-white text-black border-white'
-                        : 'bg-transparent text-white/30 border-white/5 hover:border-white/20'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
               </div>
             </div>
             
@@ -230,6 +217,8 @@ export default function JerseyDesignerPage() {
                 onAddToCart={handleAddToCart}
                 isAdding={isAdding}
                 price={CUSTOM_JERSEY_PRODUCT.price}
+                selectedSize={selectedSize}
+                onSizeChange={setSelectedSize}
               />
           </div>
         </div>

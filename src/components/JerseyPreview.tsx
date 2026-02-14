@@ -9,8 +9,10 @@ interface JerseyPreviewProps {
   playerName?: string;
   playerNumber?: string;
   previewOnly?: boolean;
-  onPositionChange?: (pos: { x: number; y: number }) => void;
+  onConfigChange?: (updates: Partial<CustomJerseyConfig>) => void;
 }
+
+type DragTarget = 'logo' | 'name' | 'number' | 'teamName' | null;
 
 export default function JerseyPreview({ 
   config, 
@@ -18,37 +20,45 @@ export default function JerseyPreview({
   playerName,
   playerNumber,
   previewOnly = false,
-  onPositionChange
+  onConfigChange
 }: JerseyPreviewProps) {
   const [view, setView] = useState<'front' | 'back'>('front');
-  const [isDragging, setIsDragging] = useState(false);
+  const [dragTarget, setDragTarget] = useState<DragTarget>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Effective values (player overrides shared design)
   const effectiveName = previewOnly && playerName ? playerName : (config.useTeamNames ? '' : config.name);
   const effectiveNumber = previewOnly && playerNumber ? playerNumber : config.number;
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (previewOnly || view === 'back') return; 
-    setIsDragging(true);
+  const handleMouseDown = (target: DragTarget) => {
+    if (previewOnly) return; 
+    setDragTarget(target);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || previewOnly || !containerRef.current || view === 'back') return;
+    if (!dragTarget || previewOnly || !containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
     // Constrain to jersey area (roughly)
-    const constrainedX = Math.max(35, Math.min(65, x));
-    const constrainedY = Math.max(25, Math.min(65, y));
+    const constrainedX = Math.max(20, Math.min(80, x));
+    const constrainedY = Math.max(15, Math.min(85, y));
     
-    onPositionChange?.({ x: constrainedX, y: constrainedY });
+    if (dragTarget === 'logo') {
+      onConfigChange?.({ logoPosition: { x: constrainedX, y: constrainedY } });
+    } else if (dragTarget === 'name') {
+      onConfigChange?.({ namePosition: { y: constrainedY } });
+    } else if (dragTarget === 'number') {
+      onConfigChange?.({ numberPosition: { y: constrainedY } });
+    } else if (dragTarget === 'teamName') {
+      onConfigChange?.({ teamNamePosition: { y: constrainedY } });
+    }
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
+    setDragTarget(null);
   };
 
   // Scale based on size
@@ -146,34 +156,37 @@ export default function JerseyPreview({
 
           {view === 'front' ? (
             <>
-              {/* Team Name on Front */}
+              {/* Team Name on Front - DRAGGABLE */}
               {config.teamName && (
                 <text
                   x="100"
-                  y="105"
+                  y={`${config.teamNamePosition.y}%`}
                   textAnchor="middle"
                   fontFamily={config.nameFont}
-                  fontSize="18"
+                  fontSize={18 * config.teamNameScale}
                   fontWeight="black"
                   fill={config.nameColor}
-                  className="uppercase italic tracking-tighter"
+                  className={`uppercase italic tracking-tighter ${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
                   style={{ letterSpacing: '2px' }}
+                  onMouseDown={() => handleMouseDown('teamName')}
                 >
                   {config.teamName}
                 </text>
               )}
 
-              {/* Front Number (Small, optional depending on style) */}
-              {(config.numberPosition === 'front' || config.numberPosition === 'both') && effectiveNumber && (
+              {/* Front Number - DRAGGABLE */}
+              {(config.numberType === 'front' || config.numberType === 'both') && effectiveNumber && (
                 <text
                   x="100"
-                  y="180"
+                  y={`${config.numberPosition.y}%`}
                   textAnchor="middle"
                   fontFamily={config.numberFont}
-                  fontSize="48"
+                  fontSize={48 * config.numberScale}
                   fontWeight="black"
                   fill={config.numberColor}
                   opacity="0.9"
+                  className={`${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
+                  onMouseDown={() => handleMouseDown('number')}
                 >
                   {effectiveNumber}
                 </text>
@@ -181,34 +194,37 @@ export default function JerseyPreview({
             </>
           ) : (
             <>
-              {/* Name on Back */}
+              {/* Name on Back - DRAGGABLE */}
               {effectiveName && (
                 <text
                   x="100"
-                  y="95"
+                  y={`${config.namePosition.y}%`}
                   textAnchor="middle"
                   fontFamily={config.nameFont}
-                  fontSize="18"
+                  fontSize={18 * config.nameScale}
                   fontWeight="black"
                   fill={config.nameColor}
-                  className="uppercase italic"
+                  className={`uppercase italic ${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
+                  onMouseDown={() => handleMouseDown('name')}
                 >
                   {effectiveName}
                 </text>
               )}
 
-              {/* Number on Back */}
-              {(config.numberPosition === 'back' || config.numberPosition === 'both' || config.numberPosition === 'front') && effectiveNumber && (
+              {/* Number on Back - DRAGGABLE */}
+              {(config.numberType === 'back' || config.numberType === 'both' || config.numberType === 'front') && effectiveNumber && (
                 <text
                   x="100"
-                  y="180"
+                  y={`${config.numberPosition.y}%`}
                   textAnchor="middle"
                   fontFamily={config.numberFont}
-                  fontSize="96"
+                  fontSize={96 * config.numberScale}
                   fontWeight="black"
                   fill={config.numberColor}
                   stroke={config.trimColor}
                   strokeWidth="1"
+                  className={`${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`}
+                  onMouseDown={() => handleMouseDown('number')}
                 >
                   {effectiveNumber}
                 </text>
@@ -220,16 +236,15 @@ export default function JerseyPreview({
         {/* Logo Overlay (Draggable - Front Only) */}
         {view === 'front' && config.logoImage && (
           <div
-            className={`absolute ${isDragging ? 'scale-110' : ''} ${previewOnly ? 'cursor-default' : 'cursor-move'}`}
+            className={`absolute ${dragTarget === 'logo' ? 'scale-110' : ''} ${previewOnly ? 'cursor-default' : 'cursor-move'}`}
             style={{
               left: `${config.logoPosition.x}%`,
               top: `${config.logoPosition.y}%`,
               transform: `translate(-50%, -50%) scale(${config.logoScale})`,
               zIndex: 40,
             }}
-            onMouseDown={handleMouseDown}
+            onMouseDown={() => handleMouseDown('logo')}
           >
-            {/* Logo Border/Indicator in Edit Mode */}
             {!previewOnly && (
                <div className="absolute inset-0 border border-amber-500/20 rounded scale-125 opacity-0 group-hover:opacity-100" />
             )}

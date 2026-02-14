@@ -16,6 +16,8 @@ interface JerseyControlsProps {
   onAddToCart: () => void;
   isAdding: boolean;
   price: number;
+  selectedSize: string;
+  onSizeChange: (size: string) => void;
 }
 
 export default function JerseyControls({
@@ -29,7 +31,9 @@ export default function JerseyControls({
   onTeamOrderChange,
   onAddToCart,
   isAdding,
-  price
+  price,
+  selectedSize,
+  onSizeChange
 }: JerseyControlsProps) {
   
   const updateConfig = (updates: Partial<CustomJerseyConfig>) => {
@@ -120,6 +124,28 @@ export default function JerseyControls({
           </button>
         </div>
       </div>
+
+      {/* Size Selection (For Individuals) */}
+      {!isTeamOrder && (
+        <div className="space-y-4">
+          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Unit Size</label>
+          <div className="flex flex-wrap gap-1">
+            {JERSEY_SIZES.map((size) => (
+              <button
+                key={size}
+                onClick={() => onSizeChange(size)}
+                className={`flex-1 min-w-[60px] py-3 text-[10px] font-black transition-all border ${
+                    selectedSize === size
+                    ? 'bg-white text-black border-white'
+                    : 'bg-transparent text-white/30 border-white/5 hover:border-white/20'
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Visual Identity Colors */}
       <div className="grid grid-cols-2 gap-8">
@@ -266,7 +292,7 @@ export default function JerseyControls({
       
       {/* Shared Name/Number (for non-team or shared design) */}
       {(!isTeamOrder || !config.useTeamNames) && (
-        <div className="space-y-8 pt-6 border-t border-white/5">
+        <div className="space-y-8 pt-6 border-t border-white/10">
           {/* Team Name */}
           <div className="space-y-4">
             <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Corporate/Team Name (Front)</label>
@@ -277,6 +303,23 @@ export default function JerseyControls({
               placeholder="ENTER TEAM NAME"
               className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-4 text-white text-lg font-black placeholder-white/10 focus:outline-none focus:border-amber-500 italic transition-all"
             />
+            {config.teamName && (
+               <div className="space-y-3">
+                  <div className="flex justify-between items-end">
+                     <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Font Scale</label>
+                     <span className="text-[10px] font-black text-white italic">{Math.round(config.teamNameScale * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.1"
+                    value={config.teamNameScale}
+                    onChange={(e) => updateConfig({ teamNameScale: parseFloat(e.target.value) })}
+                    className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer"
+                  />
+               </div>
+            )}
           </div>
 
           {/* Name */}
@@ -293,6 +336,23 @@ export default function JerseyControls({
               maxLength={15}
               className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-4 text-white text-lg font-black placeholder-white/10 focus:outline-none focus:border-amber-500 italic transition-all"
             />
+            {config.name && (
+               <div className="space-y-3 mb-4">
+                  <div className="flex justify-between items-end">
+                     <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Font Scale</label>
+                     <span className="text-[10px] font-black text-white italic">{Math.round(config.nameScale * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.1"
+                    value={config.nameScale}
+                    onChange={(e) => updateConfig({ nameScale: parseFloat(e.target.value) })}
+                    className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer"
+                  />
+               </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Typeface</label>
@@ -331,6 +391,23 @@ export default function JerseyControls({
               maxLength={2}
               className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-6 text-white text-5xl font-black placeholder-white/5 focus:outline-none focus:border-amber-500 text-center italic transition-all"
             />
+            {config.number && (
+               <div className="space-y-3">
+                  <div className="flex justify-between items-end">
+                     <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Designator Scale</label>
+                     <span className="text-[10px] font-black text-white italic">{Math.round(config.numberScale * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={config.numberScale}
+                    onChange={(e) => updateConfig({ numberScale: parseFloat(e.target.value) })}
+                    className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer"
+                  />
+               </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-2">
                   <label className="text-[9px] font-black text-white/20 uppercase tracking-widest">Typeface</label>
@@ -350,9 +427,9 @@ export default function JerseyControls({
                     {(['front', 'back', 'both'] as const).map((pos) => (
                       <button
                         key={pos}
-                        onClick={() => updateConfig({ numberPosition: pos })}
+                        onClick={() => updateConfig({ numberType: pos })}
                         className={`flex-1 py-3 text-[9px] font-black uppercase transition-all border ${
-                          config.numberPosition === pos 
+                          config.numberType === pos 
                             ? 'bg-white text-black border-white' 
                             : 'bg-white/5 text-white/30 border-white/10 hover:border-white/20'
                         }`}
@@ -369,7 +446,7 @@ export default function JerseyControls({
       
       {/* Team Players List (team order mode) */}
       {isTeamOrder && config.useTeamNames && (
-        <div className="space-y-6 pt-6 border-t border-white/5">
+        <div className="space-y-6 pt-6 border-t border-white/10">
           <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
             Deployment Roster ({teamPlayers.length})
           </label>
