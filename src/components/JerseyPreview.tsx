@@ -49,18 +49,17 @@ export default function JerseyPreview({
   const scaleMap: Record<string, number> = { 'XS': 0.85, 'S': 0.9, 'M': 1.0, 'L': 1.1, 'XL': 1.2, '2XL': 1.3, '3XL': 1.4, '4XL': 1.5 };
   const scale = scaleMap[size] || 1.0;
 
+  // Since CrewBack files aren't found, we use the Front files for the back view 
+  // but we can flip/adjust them if needed later. For now, this fixes the "zoom" issue.
   const getLayerPath = (baseName: string) => {
-    const isBack = view === 'back';
-    if (baseName === 'Body') return isBack ? '/patterns/CrewBack_Body.png' : '/patterns/CrewFront_Body.png';
-    if (baseName === 'Sleeves') return isBack ? '/patterns/CrewBack_Sleeves.png' : '/patterns/CrewFront_Sleeves.png';
-    if (baseName === 'Neck') return isBack ? '/patterns/CrewBack_Neck.png' : '/patterns/CrewFront_Neck.png';
-    // Stripes remain common for now
+    if (baseName === 'Body') return '/patterns/CrewFront_Body.png';
+    if (baseName === 'Sleeves') return '/patterns/CrewFront_Sleeves.png';
+    if (baseName === 'Neck') return '/patterns/CrewFront_Neck.png';
     if (baseName === 'Design1') return '/patterns/Design1_1.png';
     if (baseName === 'Design2') return '/patterns/Design1_2.png';
     return '';
   };
 
-  // Arced Text Logic
   const renderArcedText = (text: string, x: number, y: number, color: string, font: string, fontSize: number, arc: 'none' | 'up' | 'down') => {
     if (!text) return null;
     if (arc === 'none') {
@@ -73,7 +72,6 @@ export default function JerseyPreview({
 
     const radius = 180;
     const isUp = arc === 'up';
-    // Simple SVG Path Text for Arcs
     const pathId = `textArc_${isUp ? 'up' : 'down'}`;
     const pathD = isUp 
         ? `M ${x * 2 - 80},${y * 2.8 + 20} A ${radius},${radius} 0 0 1 ${x * 2 + 80},${y * 2.8 + 20}`
@@ -109,7 +107,8 @@ export default function JerseyPreview({
             <filter id="design2Filter"><feFlood floodColor={config.design2Color} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
           </defs>
 
-          <g>
+          {/* Scale slightly if we're on the back view and using same assets, but for now just fix the zoom */}
+          <g style={{ transform: view === 'back' ? 'scaleX(-1)' : 'none', transformOrigin: '100px 140px' }}>
               {config.showSleeves && <image href={getLayerPath('Sleeves')} width="200" height="280" filter="url(#sleeveFilter)" opacity={config.sleeveOpacity} />}
               {config.showBody && <image href={getLayerPath('Body')} width="200" height="280" filter="url(#bodyFilter)" opacity={config.bodyOpacity} />}
               {config.showCollar && <image href={getLayerPath('Neck')} width="200" height="280" filter="url(#collarFilter)" opacity={config.collarOpacity} />}
@@ -119,12 +118,10 @@ export default function JerseyPreview({
 
           {view === 'front' && (
             <>
-              {/* FRONT LOGO */}
               <g transform={`translate(${(config.logoPosition?.x ?? 50) * 2}, ${(config.logoPosition?.y ?? 35) * 2.8}) scale(${config.logoScale})`}>
                   {config.logoImage && <image href={config.logoImage} x="-20" y="-20" width="40" height="40" style={{ cursor: previewOnly ? 'default' : 'move' }} onMouseDown={() => handleMouseDown('logo')} />}
               </g>
               
-              {/* FRONT TEXT */}
               {renderArcedText(
                   config.frontText || '', 
                   config.frontTextPosition?.x ?? 50, 
@@ -139,12 +136,9 @@ export default function JerseyPreview({
 
           {view === 'back' && (
             <>
-              {/* BACK NAME */}
               <text x="100" y={(config.namePosition?.y ?? 20) * 2.8} textAnchor="middle" fill={config.nameColor} style={{ font: config.nameFont, fontSize: `${(config.nameScale ?? 1) * 12}px`, fontWeight: 'black', textTransform: 'uppercase', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('name')}>
                   {effectiveName}
               </text>
-
-              {/* BACK NUMBER */}
               <text x="100" y={(config.numberPosition?.y ?? 50) * 2.8} textAnchor="middle" fill={config.numberColor} style={{ font: config.numberFont, fontSize: `${(config.numberScale ?? 1) * 40}px`, fontWeight: 'black', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('number')}>
                   {effectiveNumber}
               </text>
