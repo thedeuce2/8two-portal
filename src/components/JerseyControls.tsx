@@ -82,7 +82,7 @@ export default function JerseyControls({
            {/* BODY COMPONENT */}
            <div className="space-y-4">
                <div className="flex justify-between items-center">
-                   <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Base Chassis</label>
+                   <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Base Chassis (Body)</label>
                    <div className="flex items-center gap-4">
                        <span className="text-[8px] font-black text-amber-500 tabular-nums">{Math.round((config.bodyOpacity ?? 1) * 100)}%</span>
                        <button onClick={() => updateConfig({ showBody: !config.showBody })} className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest border transition-all ${config.showBody ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-red-500/10 border-red-500 text-red-500'}`}>{config.showBody ? 'Equipped' : 'Removed'}</button>
@@ -116,7 +116,7 @@ export default function JerseyControls({
            {/* COLLAR COMPONENT */}
            <div className="space-y-4 pt-6 border-t border-white/5">
                <div className="flex justify-between items-center">
-                   <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Neural Neck</label>
+                   <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Neural Neck (Collar)</label>
                    <div className="flex items-center gap-4">
                        <span className="text-[8px] font-black text-amber-500 tabular-nums">{Math.round((config.collarOpacity ?? 1) * 100)}%</span>
                        <button onClick={() => updateConfig({ showCollar: !config.showCollar })} className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest border transition-all ${config.showCollar ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-red-500/10 border-red-500 text-red-500'}`}>{config.showCollar ? 'Equipped' : 'Removed'}</button>
@@ -168,26 +168,38 @@ export default function JerseyControls({
 
       {activeMatrix === 'identity' && (
         <div className="space-y-10 animate-in fade-in duration-500">
-            <div className="space-y-4">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Global Color Core</label>
-                <div className="flex flex-wrap gap-2">
-                    {JERSEY_COLORS.map(c => (
-                        <button key={c.value} onClick={() => updateConfig({ primaryColor: c.value })} className={`w-8 h-8 rounded-full border-2 transition-all ${config.primaryColor === c.value ? 'border-white scale-110 shadow-lg' : 'border-white/10 hover:border-white/30'}`} style={{ backgroundColor: c.value }} />
+            {/* FRONT TEXT SYSTEM */}
+            <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Front Text Inscription</label>
+                    <span className="text-[8px] font-black text-amber-500 tabular-nums">{Math.round((config.frontTextScale ?? 1) * 100)}% Scale</span>
+                </div>
+                <input type="text" value={config.frontText || ''} onChange={(e) => updateConfig({ frontText: e.target.value.toUpperCase() })} placeholder="ENTER FRONT TEXT" className="w-full bg-white/5 border border-white/10 p-4 text-xs font-black uppercase tracking-widest outline-none focus:border-amber-500 transition-all" />
+                
+                <div className="grid grid-cols-3 gap-1">
+                    {[
+                        { id: 'none', label: 'Straight' },
+                        { id: 'up', label: 'Arc Up' },
+                        { id: 'down', label: 'Arc Down' }
+                    ].map(arc => (
+                        <button key={arc.id} onClick={() => updateConfig({ frontTextArc: arc.id as any })} className={`py-2 text-[8px] font-black uppercase tracking-widest border transition-all ${config.frontTextArc === arc.id ? 'bg-white text-black border-white' : 'text-white/20 border-white/5 hover:border-white/10'}`}>
+                            {arc.label}
+                        </button>
                     ))}
                 </div>
-            </div>
 
-            <div className="space-y-4 pt-6 border-t border-white/5">
-                <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Global Intensity</label>
-                    <span className="text-[10px] font-black text-amber-500 tabular-nums">{Math.round(config.patternOpacity * 100)}%</span>
+                <div className="flex flex-wrap gap-2">
+                    {JERSEY_COLORS.map(c => (
+                        <button key={c.value} onClick={() => updateConfig({ frontTextColor: c.value })} className={`w-8 h-8 rounded-full border-2 transition-all ${config.frontTextColor === c.value ? 'border-white' : 'border-white/10'}`} style={{ backgroundColor: c.value }} />
+                    ))}
                 </div>
-                <input type="range" min="0" max="1" step="0.05" value={config.patternOpacity} onChange={(e) => updateConfig({ patternOpacity: parseFloat(e.target.value) })} className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer" />
+
+                <input type="range" min="0.5" max="2.5" step="0.1" value={config.frontTextScale ?? 1} onChange={(e) => updateConfig({ frontTextScale: parseFloat(e.target.value) })} className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer" />
             </div>
 
             <div className="space-y-6 pt-6 border-t border-white/5">
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Player Identity</label>
+                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Back Name (Aft Identity)</label>
                     <input type="text" value={config.name} onChange={(e) => updateConfig({ name: e.target.value.toUpperCase() })} placeholder="ENTER SURNAME" className="w-full bg-white/5 border border-white/10 p-4 text-xs font-black uppercase tracking-widest outline-none focus:border-amber-500 transition-all" />
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -199,7 +211,7 @@ export default function JerseyControls({
 
             <div className="space-y-6 pt-6 border-t border-white/5">
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Squad Number</label>
+                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Squad Number (Aft Registry)</label>
                     <input type="text" value={config.number} onChange={(e) => updateConfig({ number: e.target.value.replace(/\D/g, '').slice(0, 2) })} placeholder="00" className="w-40 bg-white/5 border border-white/10 p-4 text-2xl font-black text-center outline-none focus:border-amber-500 transition-all" />
                 </div>
                 <div className="flex flex-wrap gap-2">

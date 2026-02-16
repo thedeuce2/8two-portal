@@ -144,6 +144,14 @@ export interface CustomJerseyConfig {
 
   // State
   useTeamNames?: boolean;
+
+  // Front Text Options
+  frontText?: string;
+  frontTextPosition?: { x: number, y: number };
+  frontTextScale?: number;
+  frontTextColor?: string;
+  frontTextFont?: string;
+  frontTextArc?: 'none' | 'up' | 'down';
 }
 
 export const JERSEY_DESIGNS: JerseyDesign[] = [

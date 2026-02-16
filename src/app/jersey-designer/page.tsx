@@ -77,6 +77,14 @@ const defaultConfig: CustomJerseyConfig = {
   numberType: 'back',
 
   useTeamNames: false,
+
+  // Front Text Defaults
+  frontText: '',
+  frontTextPosition: { x: 50, y: 45 },
+  frontTextScale: 1,
+  frontTextColor: '#ffffff',
+  frontTextFont: 'Arial Black, sans-serif',
+  frontTextArc: 'none',
 };
 
 export default function JerseyDesignerPage() {
