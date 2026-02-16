@@ -116,6 +116,7 @@ export interface CustomJerseyConfig {
   numberScale: number;
   numberFont: string;
   numberColor: string;
+  numberColorOutline?: string; // New: unified outline support
   numberOutlineColor: string;
   numberOutlineWidth: number;
   numberType: 'front' | 'back' | 'both';
@@ -126,9 +127,9 @@ export interface CustomJerseyConfig {
 
 export const JERSEY_DESIGNS: JerseyDesign[] = [
   {
-    id: 'classic',
-    name: 'Classic Solid',
-    description: 'Clean, professional single-tone base with subtle accents.',
+    id: 'builder-crew-solid',
+    name: 'Crew Solid',
+    description: 'Clean, professional high-res base using component masking.',
     mapping: {
       base: 'primary',
       sleeve: 'primary',
@@ -138,84 +139,37 @@ export const JERSEY_DESIGNS: JerseyDesign[] = [
     }
   },
   {
-    id: 'aerial',
-    name: 'Aerial Elite',
-    description: 'Angular speed panels with high-contrast shoulder yokes.',
-    pattern: 'aerial',
-    mapping: {
-      base: 'primary',
-      sleeve: 'accent1',
-      yoke: 'accent2',
-      side: 'accent1',
-      collar: 'accent2'
-    }
-  },
-  {
-    id: 'striker',
-    name: 'Striker Vertical',
-    description: 'Aggressive vertical side inserts for a slim, athletic look.',
-    mapping: {
-      base: 'primary',
-      sleeve: 'primary',
-      yoke: 'primary',
-      side: 'accent1',
-      collar: 'accent1'
-    }
-  },
-  {
-    id: 'stealth',
-    name: 'Stealth Camo',
-    description: 'Subdued digital patterns across the main body panels.',
-    pattern: 'camo',
+    id: 'builder-crew-stripes-h',
+    name: 'Crew Horizontal',
+    description: 'Classic horizontal stripe patterns across the lower body.',
     mapping: {
       base: 'primary',
       sleeve: 'accent1',
       yoke: 'primary',
-      side: 'accent1',
-      collar: 'accent1'
-    }
-  },
-  {
-    id: 'velocity',
-    name: 'Velocity Mesh',
-    description: 'Technical hexagon mesh panels for high-performance aesthetic.',
-    pattern: 'mesh',
-    mapping: {
-      base: 'primary',
-      sleeve: 'accent2',
-      yoke: 'primary',
-      side: 'accent2',
-      collar: 'accent1'
-    }
-  },
-  {
-    id: '8two-elite',
-    name: '8TWO Elite X1',
-    description: 'The flagship design. Complex paneling with high-contrast tactical accents.',
-    mapping: {
-      base: 'primary',
-      sleeve: 'accent1',
-      yoke: 'accent1',
-      side: 'accent2',
-      collar: 'accent2'
-    }
-  },
-  {
-    id: 'deuce-legacy',
-    name: 'Deuce Legacy',
-    description: 'Traditional athletic silhouette with modernized shoulder paneling.',
-    mapping: {
-      base: 'primary',
-      sleeve: 'primary',
-      yoke: 'accent2',
       side: 'primary',
       collar: 'accent1'
-    }
+    },
+    overlayImage: '/patterns/Design1_1.png',
+    overlayColor: 'accent2'
   },
   {
-    id: 'builder-crew',
-    name: 'Crew Elite V1',
-    description: 'Next-gen pattern layering with high-resolution jersey components.',
+    id: 'builder-crew-stripes-v',
+    name: 'Crew Vanguard',
+    description: 'Bold diagonal shoulder stripes for a high-impact athletic look.',
+    mapping: {
+      base: 'primary',
+      sleeve: 'primary',
+      yoke: 'primary',
+      side: 'primary',
+      collar: 'accent2'
+    },
+    overlayImage: '/patterns/Design1_2.png',
+    overlayColor: 'accent1'
+  },
+  {
+    id: 'builder-crew-full',
+    name: 'Crew Pro Elite',
+    description: 'Multi-tone component layout with integrated graphic overlays.',
     mapping: {
       base: 'primary',
       sleeve: 'accent1',
@@ -224,20 +178,6 @@ export const JERSEY_DESIGNS: JerseyDesign[] = [
       collar: 'accent2'
     },
     overlayImage: '/patterns/Design1_1.png',
-    overlayColor: 'accent2'
-  },
-  {
-    id: 'builder-crew-alt',
-    name: 'Crew Elite V2',
-    description: 'Alternative component layout for specialized team configurations.',
-    mapping: {
-      base: 'primary',
-      sleeve: 'accent2',
-      yoke: 'accent1',
-      side: 'accent1',
-      collar: 'accent1'
-    },
-    overlayImage: '/patterns/Design1_2.png',
     overlayColor: 'accent2'
   }
 ];
@@ -266,7 +206,7 @@ export const JERSEY_FONTS = [
 
 export const JERSEY_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
 
-// Admin-approved logos (in production, this would come from a database/CMS)
+// Admin-approved logos
 export const APPROVED_LOGOS: ApprovedLogo[] = [
   {
     id: 'logo-0',
@@ -297,23 +237,5 @@ export const APPROVED_LOGOS: ApprovedLogo[] = [
     name: '8TWO Shield',
     imageUrl: '/logos/8two-shield.svg',
     category: 'brand',
-  },
-  {
-    id: 'logo-5',
-    name: 'Premier Sports',
-    imageUrl: '/logos/premier-sports.svg',
-    category: 'partner',
-  },
-  {
-    id: 'logo-6',
-    name: 'Athletic Club',
-    imageUrl: '/logos/athletic-club.svg',
-    category: 'partner',
-  },
-  {
-    id: 'logo-7',
-    name: 'Youth League',
-    imageUrl: '/logos/youth-league.svg',
-    category: 'league',
   },
 ];
