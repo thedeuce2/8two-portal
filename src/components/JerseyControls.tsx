@@ -171,7 +171,7 @@ export default function JerseyControls({
             {/* FRONT TEXT SYSTEM */}
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Front Text Inscription</label>
+                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Front Identity (Text)</label>
                     <span className="text-[8px] font-black text-amber-500 tabular-nums">{Math.round((config.frontTextScale ?? 1) * 100)}% Scale</span>
                 </div>
                 <input type="text" value={config.frontText || ''} onChange={(e) => updateConfig({ frontText: e.target.value.toUpperCase() })} placeholder="ENTER FRONT TEXT" className="w-full bg-white/5 border border-white/10 p-4 text-xs font-black uppercase tracking-widest outline-none focus:border-amber-500 transition-all" />
@@ -199,7 +199,7 @@ export default function JerseyControls({
 
             <div className="space-y-6 pt-6 border-t border-white/5">
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Back Name (Aft Identity)</label>
+                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Back Identity (Name)</label>
                     <input type="text" value={config.name} onChange={(e) => updateConfig({ name: e.target.value.toUpperCase() })} placeholder="ENTER SURNAME" className="w-full bg-white/5 border border-white/10 p-4 text-xs font-black uppercase tracking-widest outline-none focus:border-amber-500 transition-all" />
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -211,7 +211,7 @@ export default function JerseyControls({
 
             <div className="space-y-6 pt-6 border-t border-white/5">
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Squad Number (Aft Registry)</label>
+                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Back Identity (Number)</label>
                     <input type="text" value={config.number} onChange={(e) => updateConfig({ number: e.target.value.replace(/\D/g, '').slice(0, 2) })} placeholder="00" className="w-40 bg-white/5 border border-white/10 p-4 text-2xl font-black text-center outline-none focus:border-amber-500 transition-all" />
                 </div>
                 <div className="flex flex-wrap gap-2">
