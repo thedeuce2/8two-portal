@@ -29,6 +29,7 @@ export default function JerseyPreview({
   const effectiveName = previewOnly && playerName ? playerName : (config.useTeamNames ? '' : config.name);
   const effectiveNumber = previewOnly && playerNumber ? playerNumber : config.number;
   const design = JERSEY_DESIGNS.find(d => d.id === config.designId) || JERSEY_DESIGNS[0];
+  const isBuilderDesign = config.designId.startsWith('builder-');
 
   const getColor = (zone: keyof typeof design.mapping) => {
     const key = design.mapping[zone];
@@ -55,9 +56,6 @@ export default function JerseyPreview({
   const scaleMap: Record<string, number> = { 'XS': 0.85, 'S': 0.9, 'M': 1.0, 'L': 1.1, 'XL': 1.2, '2XL': 1.3, '3XL': 1.4, '4XL': 1.5 };
   const scale = scaleMap[size] || 1.0;
 
-  // Custom re-coloring filter for uploaded white PNGs
-  const filterColor = config.customTemplateColor === 'accent1' ? config.accent1Color : config.accent2Color;
-
   return (
     <div ref={containerRef} className="relative bg-zinc-950 rounded-lg p-8 overflow-hidden select-none border border-white/5 shadow-inner" style={{ minHeight: '600px' }} onMouseMove={handleMouseMove} onMouseUp={() => setDragTarget(null)} onMouseLeave={() => setDragTarget(null)}>
       <div className="absolute top-6 left-6 flex flex-col gap-2 z-30">
@@ -71,119 +69,68 @@ export default function JerseyPreview({
       <div className="relative mx-auto transition-all duration-700" style={{ width: '320px', height: '420px', transform: `scale(${scale})`, transformOrigin: 'top center', marginTop: '60px' }}>
         <svg viewBox="0 0 200 280" className="w-full h-full drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
           <defs>
-            <linearGradient id="panelGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#ffffff" stopOpacity="0.1" /><stop offset="50%" stopColor="#ffffff" stopOpacity="0" /><stop offset="100%" stopColor="#ffffff" stopOpacity="0.1" /></linearGradient>
-            <pattern id="meshPattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M5 0 L10 5 L5 10 L0 5 Z" fill="none" stroke={config.accent1Color} strokeWidth="0.5" opacity={config.patternOpacity} /></pattern>
-            <pattern id="camoPattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="15" fill={config.accent1Color} opacity={config.patternOpacity} /><circle cx="60" cy="70" r="25" fill={config.accent1Color} opacity={config.patternOpacity} /><circle cx="80" cy="30" r="10" fill={config.accent1Color} opacity={config.patternOpacity} /></pattern>
-            <pattern id="aerialPattern" x="0" y="0" width="200" height="280" patternUnits="userSpaceOnUse">
-               <path d="M0 40 L40 0 L200 160 L160 200 Z" fill={config.accent1Color} opacity={config.patternOpacity * 0.5} />
-               <path d="M200 40 L160 0 L0 160 L40 200 Z" fill={config.accent2Color} opacity={config.patternOpacity * 0.5} />
-            </pattern>
-
-            {/* Custom Template Re-color Filter */}
-            <filter id="templateColorFilter">
-                <feFlood floodColor={filterColor} result="flood" />
-                <feComposite in="flood" in2="SourceAlpha" operator="in" />
-            </filter>
+            <mask id="bodyMask"><image href="/patterns/CrewFront_Body.png" width="200" height="280" /></mask>
+            <mask id="sleevesMask"><image href="/patterns/CrewFront_Sleeves.png" width="200" height="280" /></mask>
+            <mask id="collarMask"><image href="/patterns/CrewFront_Neck.png" width="200" height="280" /></mask>
+            <mask id="patternMask">{design.overlayImage && <image href={design.overlayImage} width="200" height="280" />}</mask>
+            
+            <mask id="jerseyMask">
+                <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill="white" />
+            </mask>
           </defs>
 
-          <g mask="url(#jerseyMask)">
-            {/* SIDE PANELS */}
-            <path d="M30 120 L10 140 L10 260 L30 260 Z" fill={getColor('side')} />
-            <path d="M170 120 L190 140 L190 260 L170 260 Z" fill={getColor('side')} />
+          {isBuilderDesign ? (
+              <g>
+                  {/* SLEEVES */}
+                  <g mask="url(#sleevesMask)">
+                      <rect width="200" height="280" fill={getColor('sleeve')} />
+                  </g>
+                  
+                  {/* BODY */}
+                  <g mask="url(#bodyMask)">
+                      <rect width="200" height="280" fill={getColor('base')} />
+                  </g>
 
-            {/* MAIN BODY PANEL */}
-            <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={getColor('base')} />
-            
-            {/* BUILT-IN PATTERNS */}
-            {design.pattern && (
-                <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={`url(#${design.pattern}Pattern)`} pointerEvents="none" />
-            )}
+                  {/* COLLAR */}
+                  <g mask="url(#collarMask)">
+                      <rect width="200" height="280" fill={getColor('collar')} />
+                  </g>
+                  
+                  {/* OVERLAY PATTERN */}
+                  {design.overlayImage && (
+                      <g mask="url(#patternMask)">
+                          <rect width="200" height="280" fill={design.overlayColor ? config[`${design.overlayColor}Color` as keyof CustomJerseyConfig] as string : getColor('yoke')} opacity={config.patternOpacity} />
+                      </g>
+                  )}
+              </g>
+          ) : (
+              <g mask="url(#jerseyMask)">
+                {/* Legacy SVG paths */}
+                <path d="M30 120 L10 140 L10 260 L30 260 Z" fill={getColor('side')} />
+                <path d="M170 120 L190 140 L190 260 L170 260 Z" fill={getColor('side')} />
+                <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={getColor('base')} />
+                <path d="M30 60 L170 60 L170 100 L30 100 Z" fill={getColor('yoke')} />
+                <path d="M30 120 L10 140 L10 180 L30 160 Z" fill={getColor('sleeve')} />
+                <path d="M170 120 L190 140 L190 180 L170 160 Z" fill={getColor('sleeve')} />
+                <path d="M70 60 A30 30 0 0 0 130 60 Z" fill={getColor('collar')} />
+              </g>
+          )}
 
-            {/* CUSTOM UPLOADED ASSET OVERLAY */}
-            {config.customTemplateUrl && (
-                <image 
-                    href={config.customTemplateUrl} 
-                    x="0" y="40" width="200" height="240" 
-                    preserveAspectRatio="xMidYMid slice"
-                    filter="url(#templateColorFilter)"
-                    opacity={config.patternOpacity + 0.3}
-                    pointerEvents="none"
-                />
-            )}
-
-            {/* YOKE / SHOULDERS */}
-            <path d="M30 60 L60 50 L100 55 L140 50 L170 60 L155 40 L45 40 Z" fill={getColor('yoke')} />
-
-            {/* SLEEVES */}
-            <path d="M30 60 L10 80 L10 140 L25 145 L30 120 Z" fill={getColor('sleeve')} />
-            <path d="M170 60 L190 80 L190 140 L175 145 L170 120 Z" fill={getColor('sleeve')} />
+          {/* DRAGGABLE ASSETS & TEXT */}
+          <g transform={`translate(${config.logoPosition.x * 2}, ${config.logoPosition.y * 2.8}) scale(${config.logoScale})`}>
+              {config.logoImage && <image href={config.logoImage} x="-20" y="-20" width="40" height="40" style={{ cursor: previewOnly ? 'default' : 'move' }} onMouseDown={() => handleMouseDown('logo')} />}
           </g>
 
-          {/* COLLAR TRIM */}
-          <path d="M60 50 Q100 65 140 50" fill="none" stroke={getColor('collar')} strokeWidth="10" strokeLinecap="round" />
+          {/* NAME */}
+          <text x="100" y={config.namePosition.y * 2.8} textAnchor="middle" fill={config.nameColor} style={{ font: config.nameFont, fontSize: `${config.nameScale * 12}px`, fontWeight: 'black', textTransform: 'uppercase', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('name')}>
+              {effectiveName}
+          </text>
 
-          {/* OVERLAY DEPTH */}
-          <path d="M30 60 L10 80 L10 140 L25 145 L30 120 L30 260 L60 280 L140 280 L170 260 L170 120 L175 145 L190 140 L190 80 L170 60 L155 40 L100 55 L45 40 Z" fill="url(#panelGradient)" pointerEvents="none" opacity="0.3" />
-
-          {/* DECORATIONS */}
-          {view === 'front' ? (
-            <>
-              {config.teamName && (
-                <text x="100" y={`${config.teamNamePosition.y}%`} textAnchor="middle" fontFamily={config.nameFont} fontSize={18 * config.teamNameScale} fontWeight="black" fill={config.nameColor} stroke={config.teamNameOutlineColor} strokeWidth={config.nameOutlineWidth} className={`uppercase italic tracking-tighter ${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`} style={{ letterSpacing: '2px' }} onMouseDown={() => handleMouseDown('teamName')}>{config.teamName}</text>
-              )}
-              {(config.numberType === 'front' || config.numberType === 'both') && effectiveNumber && (
-                <text x="100" y={`${config.numberPosition.y}%`} textAnchor="middle" fontFamily={config.numberFont} fontSize={48 * config.numberScale} fontWeight="black" fill={config.numberColor} stroke={config.numberOutlineColor} strokeWidth={config.numberOutlineWidth} opacity="0.9" className={`${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`} onMouseDown={() => handleMouseDown('number')}>{effectiveNumber}</text>
-              )}
-            </>
-          ) : (
-            <>
-              {effectiveName && (
-                <text x="100" y={`${config.namePosition.y}%`} textAnchor="middle" fontFamily={config.nameFont} fontSize={18 * config.nameScale} fontWeight="black" fill={config.nameColor} stroke={config.nameOutlineColor} strokeWidth={config.nameOutlineWidth} className={`uppercase italic ${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`} onMouseDown={() => handleMouseDown('name')}>{effectiveName}</text>
-              )}
-              {(config.numberType === 'back' || config.numberType === 'both' || config.numberType === 'front') && effectiveNumber && (
-                <text x="100" y={`${config.numberPosition.y}%`} textAnchor="middle" fontFamily={config.numberFont} fontSize={96 * config.numberScale} fontWeight="black" fill={config.numberColor} stroke={config.numberOutlineColor} strokeWidth={config.numberOutlineWidth * 2} className={`${previewOnly ? 'cursor-default' : 'cursor-move hover:fill-amber-500'}`} onMouseDown={() => handleMouseDown('number')}>{effectiveNumber}</text>
-              )}
-            </>
-          )}
+          {/* NUMBER */}
+          <text x="100" y={config.numberPosition.y * 2.8} textAnchor="middle" fill={config.numberColor} style={{ font: config.numberFont, fontSize: `${config.numberScale * 40}px`, fontWeight: 'black', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('number')}>
+              {effectiveNumber}
+          </text>
         </svg>
-        
-        {view === 'front' && config.logoImage && (
-          <div className={`absolute ${dragTarget === 'logo' ? 'scale-110' : ''} ${previewOnly ? 'cursor-default' : 'cursor-move'}`} style={{ left: `${config.logoPosition.x}%`, top: `${config.logoPosition.y}%`, transform: `translate(-50%, -50%) scale(${config.logoScale})`, zIndex: 40 }} onMouseDown={() => handleMouseDown('logo')}>
-            {!previewOnly && <div className="absolute inset-0 border border-amber-500/20 rounded scale-150 opacity-0 group-hover:opacity-100 animate-pulse" />}
-            <img src={config.logoImage} alt="" className="max-w-20 max-h-20 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" draggable={false} />
-          </div>
-        )}
-      </div>
-      
-      {/* HUD Info */}
-      <div className="absolute top-6 right-6 flex flex-col items-end gap-1 pointer-events-none opacity-40">
-        <div className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-2">Diagnostic Overlay</div>
-        <div className="flex gap-1 h-1 w-24">
-            <div className="flex-1 bg-white" />
-            <div className="flex-1 bg-white/40" />
-            <div className="flex-1 bg-white/20" />
-            <div className="flex-1 bg-white/10" />
-        </div>
-      </div>
-
-      <div className="absolute bottom-6 right-6 flex flex-col items-end gap-1">
-        <div className="flex gap-2 mb-2 items-center">
-            <div className="text-[8px] font-black text-amber-500 uppercase tracking-widest italic animate-pulse">Sync Active</div>
-            <div className="w-1 h-3 bg-white/20" />
-            <div className="w-1 h-3 bg-white/10" />
-            <div className="w-1 h-3 bg-amber-500/40" />
-        </div>
-        <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">Tactical Profile</span>
-        <span className="text-xl font-black text-white italic uppercase tracking-tighter">{design.name}</span>
-      </div>
-      
-      <div className="absolute bottom-6 left-6 flex gap-4">
-        {[ { label: 'Primary', color: config.primaryColor }, { label: 'Acc. 1', color: config.accent1Color }, { label: 'Acc. 2', color: config.accent2Color } ].map(zone => (
-            <div key={zone.label} className="flex flex-col gap-1">
-                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest">{zone.label}</span>
-                <div className="w-6 h-1.5" style={{ backgroundColor: zone.color }} />
-            </div>
-        ))}
       </div>
     </div>
   );

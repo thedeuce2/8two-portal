@@ -211,6 +211,34 @@ export const JERSEY_DESIGNS: JerseyDesign[] = [
       side: 'primary',
       collar: 'accent1'
     }
+  },
+  {
+    id: 'builder-crew',
+    name: 'Crew Elite V1',
+    description: 'Next-gen pattern layering with high-resolution jersey components.',
+    mapping: {
+      base: 'primary',
+      sleeve: 'accent1',
+      yoke: 'primary',
+      side: 'primary',
+      collar: 'accent2'
+    },
+    overlayImage: '/patterns/Design1_1.png',
+    overlayColor: 'accent2'
+  },
+  {
+    id: 'builder-crew-alt',
+    name: 'Crew Elite V2',
+    description: 'Alternative component layout for specialized team configurations.',
+    mapping: {
+      base: 'primary',
+      sleeve: 'accent2',
+      yoke: 'accent1',
+      side: 'accent1',
+      collar: 'accent1'
+    },
+    overlayImage: '/patterns/Design1_2.png',
+    overlayColor: 'accent2'
   }
 ];
 
@@ -240,6 +268,12 @@ export const JERSEY_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
 
 // Admin-approved logos (in production, this would come from a database/CMS)
 export const APPROVED_LOGOS: ApprovedLogo[] = [
+  {
+    id: 'logo-0',
+    name: '8TWO Classic',
+    imageUrl: '/logos/8Two.png',
+    category: 'brand',
+  },
   {
     id: 'logo-1',
     name: '8TWO Logo',
