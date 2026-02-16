@@ -47,6 +47,17 @@ export default function JerseyPreview({
   const scaleMap: Record<string, number> = { 'XS': 0.85, 'S': 0.9, 'M': 1.0, 'L': 1.1, 'XL': 1.2, '2XL': 1.3, '3XL': 1.4, '4XL': 1.5 };
   const scale = scaleMap[size] || 1.0;
 
+  // Layer Path Logic based on View
+  const getLayerPath = (baseName: string) => {
+    const isBack = view === 'back';
+    if (baseName === 'Body') return isBack ? '/patterns/CrewBack_Body.png' : '/patterns/CrewFront_Body.png';
+    if (baseName === 'Sleeves') return isBack ? '/patterns/CrewBack_Sleeves.png' : '/patterns/CrewFront_Sleeves.png';
+    if (baseName === 'Neck') return isBack ? '/patterns/CrewBack_Neck.png' : '/patterns/CrewFront_Neck.png';
+    if (baseName === 'Design1') return isBack ? '/patterns/Design1_1.png' : '/patterns/Design1_1.png'; // Assuming same for now
+    if (baseName === 'Design2') return isBack ? '/patterns/Design1_2.png' : '/patterns/Design1_2.png';
+    return '';
+  };
+
   return (
     <div ref={containerRef} className="relative bg-zinc-950 rounded-lg p-8 overflow-hidden select-none border border-white/5 shadow-inner" style={{ minHeight: '600px' }} onMouseMove={handleMouseMove} onMouseUp={() => setDragTarget(null)} onMouseLeave={() => setDragTarget(null)}>
       <div className="absolute top-6 left-6 flex flex-col gap-2 z-30">
@@ -60,7 +71,6 @@ export default function JerseyPreview({
       <div className="relative mx-auto transition-all duration-700" style={{ width: '320px', height: '420px', transform: `scale(${scale})`, transformOrigin: 'top center', marginTop: '60px' }}>
         <svg viewBox="0 0 200 280" className="w-full h-full drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
           <defs>
-            {/* COMPONENT FILTERS (Ensures solid colors by flooding the alpha channel) */}
             <filter id="bodyFilter"><feFlood floodColor={config.bodyColor} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
             <filter id="sleeveFilter"><feFlood floodColor={config.sleeveColor} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
             <filter id="collarFilter"><feFlood floodColor={config.collarColor} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
@@ -69,46 +79,49 @@ export default function JerseyPreview({
           </defs>
 
           <g>
-              {/* SLEEVES */}
               {config.showSleeves && (
-                  <image href="/patterns/CrewFront_Sleeves.png" width="200" height="280" filter="url(#sleeveFilter)" opacity={config.sleeveOpacity} />
+                  <image href={getLayerPath('Sleeves')} width="200" height="280" filter="url(#sleeveFilter)" opacity={config.sleeveOpacity} />
               )}
               
-              {/* BODY */}
               {config.showBody && (
-                  <image href="/patterns/CrewFront_Body.png" width="200" height="280" filter="url(#bodyFilter)" opacity={config.bodyOpacity} />
+                  <image href={getLayerPath('Body')} width="200" height="280" filter="url(#bodyFilter)" opacity={config.bodyOpacity} />
               )}
 
-              {/* COLLAR */}
               {config.showCollar && (
-                  <image href="/patterns/CrewFront_Neck.png" width="200" height="280" filter="url(#collarFilter)" opacity={config.collarOpacity} />
+                  <image href={getLayerPath('Neck')} width="200" height="280" filter="url(#collarFilter)" opacity={config.collarOpacity} />
               )}
               
-              {/* DESIGN 1 (Horizontal Stripes) */}
               {config.showDesign1 && (
-                  <image href="/patterns/Design1_1.png" width="200" height="280" filter="url(#design1Filter)" opacity={config.design1Opacity} />
+                  <image href={getLayerPath('Design1')} width="200" height="280" filter="url(#design1Filter)" opacity={config.design1Opacity} />
               )}
 
-              {/* DESIGN 2 (Shoulder Stripes) */}
               {config.showDesign2 && (
-                  <image href="/patterns/Design1_2.png" width="200" height="280" filter="url(#design2Filter)" opacity={config.design2Opacity} />
+                  <image href={getLayerPath('Design2')} width="200" height="280" filter="url(#design2Filter)" opacity={config.design2Opacity} />
               )}
           </g>
 
-          {/* DRAGGABLE ASSETS & TEXT */}
-          <g transform={`translate(${config.logoPosition.x * 2}, ${config.logoPosition.y * 2.8}) scale(${config.logoScale})`}>
-              {config.logoImage && <image href={config.logoImage} x="-20" y="-20" width="40" height="40" style={{ cursor: previewOnly ? 'default' : 'move' }} onMouseDown={() => handleMouseDown('logo')} />}
-          </g>
+          {/* DRAGGABLE ASSETS & TEXT (View Dependent) */}
+          {view === 'front' && (
+            <>
+              <g transform={`translate(${config.logoPosition.x * 2}, ${config.logoPosition.y * 2.8}) scale(${config.logoScale})`}>
+                  {config.logoImage && <image href={config.logoImage} x="-20" y="-20" width="40" height="40" style={{ cursor: previewOnly ? 'default' : 'move' }} onMouseDown={() => handleMouseDown('logo')} />}
+              </g>
+            </>
+          )}
 
-          {/* NAME */}
-          <text x="100" y={config.namePosition.y * 2.8} textAnchor="middle" fill={config.nameColor} style={{ font: config.nameFont, fontSize: `${config.nameScale * 12}px`, fontWeight: 'black', textTransform: 'uppercase', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('name')}>
-              {effectiveName}
-          </text>
+          {view === 'back' && (
+            <>
+              {/* NAME */}
+              <text x="100" y={config.namePosition.y * 2.8} textAnchor="middle" fill={config.nameColor} style={{ font: config.nameFont, fontSize: `${config.nameScale * 12}px`, fontWeight: 'black', textTransform: 'uppercase', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('name')}>
+                  {effectiveName}
+              </text>
 
-          {/* NUMBER */}
-          <text x="100" y={config.numberPosition.y * 2.8} textAnchor="middle" fill={config.numberColor} style={{ font: config.numberFont, fontSize: `${config.numberScale * 40}px`, fontWeight: 'black', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('number')}>
-              {effectiveNumber}
-          </text>
+              {/* NUMBER */}
+              <text x="100" y={config.numberPosition.y * 2.8} textAnchor="middle" fill={config.numberColor} style={{ font: config.numberFont, fontSize: `${config.numberScale * 40}px`, fontWeight: 'black', cursor: previewOnly ? 'default' : 'ns-resize' }} onMouseDown={() => handleMouseDown('number')}>
+                  {effectiveNumber}
+              </text>
+            </>
+          )}
         </svg>
       </div>
     </div>
