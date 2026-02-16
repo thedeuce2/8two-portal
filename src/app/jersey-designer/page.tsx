@@ -22,12 +22,26 @@ const JerseyControls = dynamic(() => import('@/components/JerseyControls'), {
 });
 
 const defaultConfig: CustomJerseyConfig = {
-  designId: 'classic',
+  designId: 'modular-crew',
   primaryColor: '#1a1a1a',
   accent1Color: '#ffffff',
   accent2Color: '#333333',
   
-  patternOpacity: 0.1,
+  // High-Res Layer Toggles
+  showBody: true,
+  showSleeves: true,
+  showCollar: true,
+  showDesign1: false,
+  showDesign2: false,
+
+  // High-Res Layer Colors
+  bodyColor: '#1a1a1a',
+  sleeveColor: '#1a1a1a',
+  collarColor: '#ffffff',
+  design1Color: '#333333',
+  design2Color: '#333333',
+
+  patternOpacity: 1.0,
   customTemplateColor: 'accent1',
 
   logoPosition: { x: 50, y: 35 },

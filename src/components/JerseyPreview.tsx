@@ -28,15 +28,6 @@ export default function JerseyPreview({
 
   const effectiveName = previewOnly && playerName ? playerName : (config.useTeamNames ? '' : config.name);
   const effectiveNumber = previewOnly && playerNumber ? playerNumber : config.number;
-  const design = JERSEY_DESIGNS.find(d => d.id === config.designId) || JERSEY_DESIGNS[0];
-  const isBuilderDesign = config.designId.startsWith('builder-');
-
-  const getColor = (zone: keyof typeof design.mapping) => {
-    const key = design.mapping[zone];
-    if (key === 'primary') return config.primaryColor;
-    if (key === 'accent1') return config.accent1Color;
-    return config.accent2Color;
-  };
 
   const handleMouseDown = (target: DragTarget) => { if (previewOnly) return; setDragTarget(target); };
 
@@ -69,52 +60,50 @@ export default function JerseyPreview({
       <div className="relative mx-auto transition-all duration-700" style={{ width: '320px', height: '420px', transform: `scale(${scale})`, transformOrigin: 'top center', marginTop: '60px' }}>
         <svg viewBox="0 0 200 280" className="w-full h-full drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
           <defs>
+            {/* COMPONENT MASKS */}
             <mask id="bodyMask"><image href="/patterns/CrewFront_Body.png" width="200" height="280" /></mask>
             <mask id="sleevesMask"><image href="/patterns/CrewFront_Sleeves.png" width="200" height="280" /></mask>
             <mask id="collarMask"><image href="/patterns/CrewFront_Neck.png" width="200" height="280" /></mask>
-            <mask id="patternMask">{design.overlayImage && <image href={design.overlayImage} width="200" height="280" />}</mask>
-            
-            <mask id="jerseyMask">
-                <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill="white" />
-            </mask>
+            <mask id="design1Mask"><image href="/patterns/Design1_1.png" width="200" height="280" /></mask>
+            <mask id="design2Mask"><image href="/patterns/Design1_2.png" width="200" height="280" /></mask>
           </defs>
 
-          {isBuilderDesign ? (
-              <g>
-                  {/* SLEEVES */}
+          <g>
+              {/* SLEEVES */}
+              {config.showSleeves && (
                   <g mask="url(#sleevesMask)">
-                      <rect width="200" height="280" fill={getColor('sleeve')} />
+                      <rect width="200" height="280" fill={config.sleeveColor} />
                   </g>
-                  
-                  {/* BODY */}
+              )}
+              
+              {/* BODY */}
+              {config.showBody && (
                   <g mask="url(#bodyMask)">
-                      <rect width="200" height="280" fill={getColor('base')} />
+                      <rect width="200" height="280" fill={config.bodyColor} />
                   </g>
+              )}
 
-                  {/* COLLAR */}
+              {/* COLLAR */}
+              {config.showCollar && (
                   <g mask="url(#collarMask)">
-                      <rect width="200" height="280" fill={getColor('collar')} />
+                      <rect width="200" height="280" fill={config.collarColor} />
                   </g>
-                  
-                  {/* OVERLAY PATTERN */}
-                  {design.overlayImage && (
-                      <g mask="url(#patternMask)">
-                          <rect width="200" height="280" fill={design.overlayColor ? config[`${design.overlayColor}Color` as keyof CustomJerseyConfig] as string : getColor('yoke')} opacity={config.patternOpacity} />
-                      </g>
-                  )}
-              </g>
-          ) : (
-              <g mask="url(#jerseyMask)">
-                {/* Legacy SVG paths */}
-                <path d="M30 120 L10 140 L10 260 L30 260 Z" fill={getColor('side')} />
-                <path d="M170 120 L190 140 L190 260 L170 260 Z" fill={getColor('side')} />
-                <path d="M30 60 L170 60 L170 260 L140 280 L60 280 L30 260 Z" fill={getColor('base')} />
-                <path d="M30 60 L170 60 L170 100 L30 100 Z" fill={getColor('yoke')} />
-                <path d="M30 120 L10 140 L10 180 L30 160 Z" fill={getColor('sleeve')} />
-                <path d="M170 120 L190 140 L190 180 L170 160 Z" fill={getColor('sleeve')} />
-                <path d="M70 60 A30 30 0 0 0 130 60 Z" fill={getColor('collar')} />
-              </g>
-          )}
+              )}
+              
+              {/* DESIGN 1 (Horizontal Stripes) */}
+              {config.showDesign1 && (
+                  <g mask="url(#design1Mask)">
+                      <rect width="200" height="280" fill={config.design1Color} opacity={config.patternOpacity} />
+                  </g>
+              )}
+
+              {/* DESIGN 2 (Shoulder Stripes) */}
+              {config.showDesign2 && (
+                  <g mask="url(#design2Mask)">
+                      <rect width="200" height="280" fill={config.design2Color} opacity={config.patternOpacity} />
+                  </g>
+              )}
+          </g>
 
           {/* DRAGGABLE ASSETS & TEXT */}
           <g transform={`translate(${config.logoPosition.x * 2}, ${config.logoPosition.y * 2.8}) scale(${config.logoScale})`}>

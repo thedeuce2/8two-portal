@@ -85,6 +85,20 @@ export interface CustomJerseyConfig {
   accent1Color: string;
   accent2Color: string;
   
+  // High-Res Layer Toggles
+  showBody: boolean;
+  showSleeves: boolean;
+  showCollar: boolean;
+  showDesign1: boolean;
+  showDesign2: boolean;
+
+  // High-Res Layer Colors
+  bodyColor: string;
+  sleeveColor: string;
+  collarColor: string;
+  design1Color: string;
+  design2Color: string;
+
   // Patterns (linked to design or manual override)
   patternOpacity: number;
   
@@ -127,58 +141,16 @@ export interface CustomJerseyConfig {
 
 export const JERSEY_DESIGNS: JerseyDesign[] = [
   {
-    id: 'builder-crew-solid',
-    name: 'Crew Solid',
-    description: 'Clean, professional high-res base using component masking.',
+    id: 'modular-crew',
+    name: 'Modular Crew',
+    description: 'Fully customizable high-res component system.',
     mapping: {
       base: 'primary',
       sleeve: 'primary',
       yoke: 'primary',
       side: 'primary',
-      collar: 'accent1'
+      collar: 'primary'
     }
-  },
-  {
-    id: 'builder-crew-stripes-h',
-    name: 'Crew Horizontal',
-    description: 'Classic horizontal stripe patterns across the lower body.',
-    mapping: {
-      base: 'primary',
-      sleeve: 'accent1',
-      yoke: 'primary',
-      side: 'primary',
-      collar: 'accent1'
-    },
-    overlayImage: '/patterns/Design1_1.png',
-    overlayColor: 'accent2'
-  },
-  {
-    id: 'builder-crew-stripes-v',
-    name: 'Crew Vanguard',
-    description: 'Bold diagonal shoulder stripes for a high-impact athletic look.',
-    mapping: {
-      base: 'primary',
-      sleeve: 'primary',
-      yoke: 'primary',
-      side: 'primary',
-      collar: 'accent2'
-    },
-    overlayImage: '/patterns/Design1_2.png',
-    overlayColor: 'accent1'
-  },
-  {
-    id: 'builder-crew-full',
-    name: 'Crew Pro Elite',
-    description: 'Multi-tone component layout with integrated graphic overlays.',
-    mapping: {
-      base: 'primary',
-      sleeve: 'accent1',
-      yoke: 'primary',
-      side: 'primary',
-      collar: 'accent2'
-    },
-    overlayImage: '/patterns/Design1_1.png',
-    overlayColor: 'accent2'
   }
 ];
 
