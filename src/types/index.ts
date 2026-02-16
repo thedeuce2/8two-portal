@@ -99,6 +99,13 @@ export interface CustomJerseyConfig {
   design1Color: string;
   design2Color: string;
 
+  // High-Res Layer Opacities
+  bodyOpacity: number;
+  sleeveOpacity: number;
+  collarOpacity: number;
+  design1Opacity: number;
+  design2Opacity: number;
+
   // Patterns (linked to design or manual override)
   patternOpacity: number;
   

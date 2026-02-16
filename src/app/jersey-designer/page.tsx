@@ -41,6 +41,13 @@ const defaultConfig: CustomJerseyConfig = {
   design1Color: '#333333',
   design2Color: '#333333',
 
+  // High-Res Layer Opacities
+  bodyOpacity: 1.0,
+  sleeveOpacity: 1.0,
+  collarOpacity: 1.0,
+  design1Opacity: 0.5,
+  design2Opacity: 0.5,
+
   patternOpacity: 1.0,
   customTemplateColor: 'accent1',
 

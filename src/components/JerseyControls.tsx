@@ -122,26 +122,34 @@ export default function JerseyControls({
            <div className="space-y-4 pt-6 border-t border-white/5">
                <div className="flex justify-between items-center">
                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Dorsal Stripes (V1)</label>
-                   <button onClick={() => updateConfig({ showDesign1: !config.showDesign1 })} className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest border transition-all ${config.showDesign1 ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-red-500/10 border-red-500 text-red-500'}`}>{config.showDesign1 ? 'Active' : 'Offline'}</button>
+                   <div className="flex items-center gap-4">
+                       <span className="text-[8px] font-black text-amber-500 tabular-nums">{Math.round(config.design1Opacity * 100)}%</span>
+                       <button onClick={() => updateConfig({ showDesign1: !config.showDesign1 })} className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest border transition-all ${config.showDesign1 ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-red-500/10 border-red-500 text-red-500'}`}>{config.showDesign1 ? 'Active' : 'Offline'}</button>
+                   </div>
                </div>
                <div className="flex flex-wrap gap-2">
                    {JERSEY_COLORS.map(c => (
                        <button key={c.value} onClick={() => updateConfig({ design1Color: c.value })} className={`w-8 h-8 rounded-full border-2 transition-all ${config.design1Color === c.value ? 'border-white scale-110 shadow-lg' : 'border-white/10 hover:border-white/30'}`} style={{ backgroundColor: c.value }} title={c.name} />
                    ))}
                </div>
+               <input type="range" min="0" max="1" step="0.05" value={config.design1Opacity} onChange={(e) => updateConfig({ design1Opacity: parseFloat(e.target.value) })} className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer" />
            </div>
 
            {/* DESIGN 2 (SHOULDER) */}
            <div className="space-y-4 pt-6 border-t border-white/5">
                <div className="flex justify-between items-center">
                    <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Apex Overlays (V2)</label>
-                   <button onClick={() => updateConfig({ showDesign2: !config.showDesign2 })} className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest border transition-all ${config.showDesign2 ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-red-500/10 border-red-500 text-red-500'}`}>{config.showDesign2 ? 'Active' : 'Offline'}</button>
+                   <div className="flex items-center gap-4">
+                        <span className="text-[8px] font-black text-amber-500 tabular-nums">{Math.round(config.design2Opacity * 100)}%</span>
+                        <button onClick={() => updateConfig({ showDesign2: !config.showDesign2 })} className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest border transition-all ${config.showDesign2 ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-red-500/10 border-red-500 text-red-500'}`}>{config.showDesign2 ? 'Active' : 'Offline'}</button>
+                   </div>
                </div>
                <div className="flex flex-wrap gap-2">
                    {JERSEY_COLORS.map(c => (
                        <button key={c.value} onClick={() => updateConfig({ design2Color: c.value })} className={`w-8 h-8 rounded-full border-2 transition-all ${config.design2Color === c.value ? 'border-white scale-110 shadow-lg' : 'border-white/10 hover:border-white/30'}`} style={{ backgroundColor: c.value }} title={c.name} />
                    ))}
                </div>
+               <input type="range" min="0" max="1" step="0.05" value={config.design2Opacity} onChange={(e) => updateConfig({ design2Opacity: parseFloat(e.target.value) })} className="w-full accent-amber-500 bg-white/5 h-1 appearance-none cursor-pointer" />
            </div>
         </div>
       )}

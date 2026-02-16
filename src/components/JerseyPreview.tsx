@@ -72,35 +72,35 @@ export default function JerseyPreview({
               {/* SLEEVES */}
               {config.showSleeves && (
                   <g mask="url(#sleevesMask)">
-                      <rect width="200" height="280" fill={config.sleeveColor} />
+                      <rect width="200" height="280" fill={config.sleeveColor} opacity={config.sleeveOpacity} />
                   </g>
               )}
               
               {/* BODY */}
               {config.showBody && (
                   <g mask="url(#bodyMask)">
-                      <rect width="200" height="280" fill={config.bodyColor} />
+                      <rect width="200" height="280" fill={config.bodyColor} opacity={config.bodyOpacity} />
                   </g>
               )}
 
               {/* COLLAR */}
               {config.showCollar && (
                   <g mask="url(#collarMask)">
-                      <rect width="200" height="280" fill={config.collarColor} />
+                      <rect width="200" height="280" fill={config.collarColor} opacity={config.collarOpacity} />
                   </g>
               )}
               
               {/* DESIGN 1 (Horizontal Stripes) */}
               {config.showDesign1 && (
                   <g mask="url(#design1Mask)">
-                      <rect width="200" height="280" fill={config.design1Color} opacity={config.patternOpacity} />
+                      <rect width="200" height="280" fill={config.design1Color} opacity={config.design1Opacity} />
                   </g>
               )}
 
               {/* DESIGN 2 (Shoulder Stripes) */}
               {config.showDesign2 && (
                   <g mask="url(#design2Mask)">
-                      <rect width="200" height="280" fill={config.design2Color} opacity={config.patternOpacity} />
+                      <rect width="200" height="280" fill={config.design2Color} opacity={config.design2Opacity} />
                   </g>
               )}
           </g>
