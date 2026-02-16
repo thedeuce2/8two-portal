@@ -60,48 +60,38 @@ export default function JerseyPreview({
       <div className="relative mx-auto transition-all duration-700" style={{ width: '320px', height: '420px', transform: `scale(${scale})`, transformOrigin: 'top center', marginTop: '60px' }}>
         <svg viewBox="0 0 200 280" className="w-full h-full drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
           <defs>
-            {/* COMPONENT MASKS */}
-            <mask id="bodyMask"><image href="/patterns/CrewFront_Body.png" width="200" height="280" /></mask>
-            <mask id="sleevesMask"><image href="/patterns/CrewFront_Sleeves.png" width="200" height="280" /></mask>
-            <mask id="collarMask"><image href="/patterns/CrewFront_Neck.png" width="200" height="280" /></mask>
-            <mask id="design1Mask"><image href="/patterns/Design1_1.png" width="200" height="280" /></mask>
-            <mask id="design2Mask"><image href="/patterns/Design1_2.png" width="200" height="280" /></mask>
+            {/* COMPONENT FILTERS (Ensures solid colors by flooding the alpha channel) */}
+            <filter id="bodyFilter"><feFlood floodColor={config.bodyColor} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
+            <filter id="sleeveFilter"><feFlood floodColor={config.sleeveColor} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
+            <filter id="collarFilter"><feFlood floodColor={config.collarColor} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
+            <filter id="design1Filter"><feFlood floodColor={config.design1Color} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
+            <filter id="design2Filter"><feFlood floodColor={config.design2Color} result="flood" /><feComposite in="flood" in2="SourceAlpha" operator="in" /></filter>
           </defs>
 
           <g>
               {/* SLEEVES */}
               {config.showSleeves && (
-                  <g mask="url(#sleevesMask)">
-                      <rect width="200" height="280" fill={config.sleeveColor} opacity={config.sleeveOpacity} />
-                  </g>
+                  <image href="/patterns/CrewFront_Sleeves.png" width="200" height="280" filter="url(#sleeveFilter)" opacity={config.sleeveOpacity} />
               )}
               
               {/* BODY */}
               {config.showBody && (
-                  <g mask="url(#bodyMask)">
-                      <rect width="200" height="280" fill={config.bodyColor} opacity={config.bodyOpacity} />
-                  </g>
+                  <image href="/patterns/CrewFront_Body.png" width="200" height="280" filter="url(#bodyFilter)" opacity={config.bodyOpacity} />
               )}
 
               {/* COLLAR */}
               {config.showCollar && (
-                  <g mask="url(#collarMask)">
-                      <rect width="200" height="280" fill={config.collarColor} opacity={config.collarOpacity} />
-                  </g>
+                  <image href="/patterns/CrewFront_Neck.png" width="200" height="280" filter="url(#collarFilter)" opacity={config.collarOpacity} />
               )}
               
               {/* DESIGN 1 (Horizontal Stripes) */}
               {config.showDesign1 && (
-                  <g mask="url(#design1Mask)">
-                      <rect width="200" height="280" fill={config.design1Color} opacity={config.design1Opacity} />
-                  </g>
+                  <image href="/patterns/Design1_1.png" width="200" height="280" filter="url(#design1Filter)" opacity={config.design1Opacity} />
               )}
 
               {/* DESIGN 2 (Shoulder Stripes) */}
               {config.showDesign2 && (
-                  <g mask="url(#design2Mask)">
-                      <rect width="200" height="280" fill={config.design2Color} opacity={config.design2Opacity} />
-                  </g>
+                  <image href="/patterns/Design1_2.png" width="200" height="280" filter="url(#design2Filter)" opacity={config.design2Opacity} />
               )}
           </g>
 
